@@ -4,8 +4,9 @@ A modern web application for tracking and analyzing chess games with comprehensi
 
 ## Features
 
-- 📊 **Game Tracking**: Record and view all your chess games
-- 📈 **Analytics Dashboard**: Comprehensive statistics including win rate, rating changes, and performance metrics
+- 👥 **Players Management**: View all chess players and their profiles
+- 📊 **Game Tracking**: Record and view all chess games between players
+- 📈 **Analytics Dashboard**: Comprehensive statistics including win rate, rating changes, and performance metrics for each player
 - 🎨 **Modern UI**: Beautiful, responsive design built with Tailwind CSS
 - 🔍 **Game Details**: Detailed view of individual games with all relevant information
 - 📱 **Responsive**: Works seamlessly on desktop and mobile devices
@@ -38,7 +39,7 @@ npm install
 npm run dev
 ```
 
-3. Open your browser and navigate to `http://localhost:5173`
+3. Open your browser and navigate to `http://localhost:5173/chessStatistics`
 
 ### Build for Production
 
@@ -54,6 +55,22 @@ The built files will be in the `dist` directory.
 npm run preview
 ```
 
+The preview will be available at `http://localhost:4173/chessStatistics`
+
+### Deployment
+
+The application is configured to be deployed at the `/chessStatistics` path. 
+
+**Important:** When deploying to a server:
+- Make sure your web server is configured to serve the application from `/chessStatistics`
+- For Apache, you may need to configure `.htaccess` with base path rewrite rules
+- For Nginx, configure the location block to serve from `/chessStatistics`
+- For static hosting (like GitHub Pages, Netlify, Vercel), ensure the base path is set correctly in your hosting configuration
+
+The application uses:
+- Base path: `/chessStatistics/` (configured in `vite.config.ts`)
+- React Router basename: `/chessStatistics` (configured in `App.tsx`)
+
 ## Project Structure
 
 ```
@@ -63,12 +80,15 @@ src/
   │   ├── GameCard.tsx
   │   ├── GameDetails.tsx
   │   ├── GameList.tsx
-  │   └── Layout.tsx
+  │   ├── Layout.tsx
+  │   ├── PlayerCard.tsx
+  │   └── PlayerList.tsx
   ├── data/          # Mock data
-  │   └── mockData.ts
+  │   ├── mockGames.ts
+  │   └── mockPlayers.ts
   ├── pages/         # Page components
-  │   ├── AnalyticsPage.tsx
-  │   └── GamesPage.tsx
+  │   ├── PlayerPage.tsx
+  │   └── PlayersPage.tsx
   ├── types/         # TypeScript types
   │   └── chess.ts
   ├── utils/         # Utility functions
