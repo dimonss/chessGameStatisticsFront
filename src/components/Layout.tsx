@@ -25,7 +25,7 @@ export function Layout({ children }: LayoutProps) {
                 Chess Statistics
               </span>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex items-center space-x-3">
               {navItems.map(item => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
