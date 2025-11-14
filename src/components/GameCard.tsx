@@ -12,7 +12,7 @@ interface GameCardProps {
 export function GameCard({ game, onClick, currentPlayerId }: GameCardProps) {
   const opponent = mockPlayers.find(p => p.id === game.opponentId);
   const opponentName = opponent?.name || 'Unknown';
-  
+  console.log(currentPlayerId);
   const resultIcons = {
     win: <Trophy className="w-6 h-6 text-emerald-500" />,
     loss: <TrendingDown className="w-6 h-6 text-rose-500" />,
