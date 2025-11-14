@@ -6,7 +6,7 @@ import { GameDetails } from './components/GameDetails';
 
 function App() {
   return (
-    <BrowserRouter basename="/chessStatistics">
+    <BrowserRouter basename="/chess_statistics">
       <Layout>
         <Routes>
           <Route path="/" element={<PlayersPage />} />

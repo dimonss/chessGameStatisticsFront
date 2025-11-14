@@ -39,7 +39,7 @@ npm install
 npm run dev
 ```
 
-3. Open your browser and navigate to `http://localhost:5173/chessStatistics`
+3. Open your browser and navigate to `http://localhost:5173/chess_statistics`
 
 ### Build for Production
 
@@ -55,21 +55,21 @@ The built files will be in the `dist` directory.
 npm run preview
 ```
 
-The preview will be available at `http://localhost:4173/chessStatistics`
+The preview will be available at `http://localhost:4173/chess_statistics`
 
 ### Deployment
 
-The application is configured to be deployed at the `/chessStatistics` path. 
+The application is configured to be deployed at the `/chess_statistics` path. 
 
 **Important:** When deploying to a server:
-- Make sure your web server is configured to serve the application from `/chessStatistics`
+- Make sure your web server is configured to serve the application from `/chess_statistics`
 - For Apache, you may need to configure `.htaccess` with base path rewrite rules
-- For Nginx, configure the location block to serve from `/chessStatistics`
+- For Nginx, configure the location block to serve from `/chess_statistics`
 - For static hosting (like GitHub Pages, Netlify, Vercel), ensure the base path is set correctly in your hosting configuration
 
 The application uses:
-- Base path: `/chessStatistics/` (configured in `vite.config.ts`)
-- React Router basename: `/chessStatistics` (configured in `App.tsx`)
+- Base path: `/chess_statistics/` (configured in `vite.config.ts`)
+- React Router basename: `/chess_statistics` (configured in `App.tsx`)
 
 ## Project Structure
 
