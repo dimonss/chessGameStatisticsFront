@@ -1,7 +1,8 @@
-import { Player } from '../types/chess';
+import { useState, useEffect } from 'react';
+import { Player, ChessGame } from '../types/chess';
 import { User, TrendingUp, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { mockGames } from '../data/mockGames';
+import { gameAPI } from '../utils/api';
 
 interface PlayerCardProps {
   player: Player;
@@ -9,9 +10,25 @@ interface PlayerCardProps {
 
 export function PlayerCard({ player }: PlayerCardProps) {
   const navigate = useNavigate();
+  const [playerGames, setPlayerGames] = useState<ChessGame[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        const games = await gameAPI.getByPlayerId(player.id);
+        setPlayerGames(games);
+      } catch (err) {
+        console.error('Error fetching player games:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchGames();
+  }, [player.id]);
   
   // Подсчитываем статистику для игрока
-  const playerGames = mockGames.filter(g => g.playerId === player.id);
   const wins = playerGames.filter(g => g.result === 'win').length;
   const losses = playerGames.filter(g => g.result === 'loss').length;
   const draws = playerGames.filter(g => g.result === 'draw').length;

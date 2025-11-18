@@ -1,7 +1,8 @@
-import { ChessGame } from '../types/chess';
+import { useState, useEffect } from 'react';
+import { ChessGame, Player } from '../types/chess';
 import { format } from 'date-fns';
 import { Trophy, TrendingDown, TrendingUp, Minus, User, Clock, Move } from 'lucide-react';
-import { mockPlayers } from '../data/mockPlayers';
+import { playerAPI } from '../utils/api';
 
 interface GameCardProps {
   game: ChessGame;
@@ -10,9 +11,22 @@ interface GameCardProps {
 }
 
 export function GameCard({ game, onClick, currentPlayerId }: GameCardProps) {
-  const opponent = mockPlayers.find(p => p.id === game.opponentId);
-  const opponentName = opponent?.name || 'Unknown';
-  console.log(currentPlayerId);
+  const [opponent, setOpponent] = useState<Player | null>(null);
+  
+  useEffect(() => {
+    const fetchOpponent = async () => {
+      try {
+        const opponentData = await playerAPI.getById(game.opponentId);
+        setOpponent(opponentData);
+      } catch (err) {
+        console.error('Error fetching opponent:', err);
+      }
+    };
+    
+    fetchOpponent();
+  }, [game.opponentId]);
+  
+  const opponentName = opponent?.name || 'Loading...';
   const resultIcons = {
     win: <Trophy className="w-6 h-6 text-emerald-500" />,
     loss: <TrendingDown className="w-6 h-6 text-rose-500" />,

@@ -1,26 +1,73 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { mockPlayers } from '../data/mockPlayers';
-import { mockGames } from '../data/mockGames';
+import { useState, useEffect } from 'react';
+import { playerAPI, gameAPI } from '../utils/api';
+import { Player, ChessGame, GameStatistics } from '../types/chess';
 import { GameList } from '../components/GameList';
 import { Analytics } from '../components/Analytics';
-import { calculateStatistics } from '../utils/statistics';
-import { ArrowLeft, User, Trophy } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, User, Trophy, Loader2, AlertCircle } from 'lucide-react';
 
 export function PlayerPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'games' | 'analytics'>('games');
-  
-  const player = mockPlayers.find(p => p.id === id);
-  const playerGames = mockGames.filter(g => g.playerId === id);
-  const statistics = calculateStatistics(playerGames);
+  const [player, setPlayer] = useState<Player | null>(null);
+  const [playerGames, setPlayerGames] = useState<ChessGame[]>([]);
+  const [statistics, setStatistics] = useState<GameStatistics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!player) {
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!id) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const [playerData, gamesData, statsData] = await Promise.all([
+          playerAPI.getById(id),
+          gameAPI.getByPlayerId(id),
+          gameAPI.getPlayerStatistics(id)
+        ]);
+        
+        setPlayer(playerData);
+        setPlayerGames(gamesData);
+        setStatistics(statsData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load player data');
+        console.error('Error fetching player data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px] animate-fade-in">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading player data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !player) {
     return (
       <div className="text-center py-20 animate-fade-in">
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 max-w-md mx-auto">
-          <p className="text-gray-500 mb-6 text-lg">Player not found</p>
+          {error ? (
+            <>
+              <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-4" />
+              <p className="text-gray-700 mb-2 font-semibold">Error loading player</p>
+              <p className="text-gray-500 text-sm mb-6">{error}</p>
+            </>
+          ) : (
+            <p className="text-gray-500 mb-6 text-lg">Player not found</p>
+          )}
           <button
             onClick={() => navigate('/')}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
@@ -75,11 +122,13 @@ export function PlayerPage() {
               </div>
               <div>
                 <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Games</span>
-                <p className="text-3xl font-bold text-gray-900">{statistics.totalGames}</p>
+                <p className="text-3xl font-bold text-gray-900">{statistics ? statistics.totalGames : 0}</p>
               </div>
               <div>
                 <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Win Rate</span>
-                <p className="text-3xl font-bold text-emerald-600">{statistics.winRate.toFixed(1)}%</p>
+                <p className="text-3xl font-bold text-emerald-600">
+                  {statistics ? statistics.winRate.toFixed(1) : '0.0'}%
+                </p>
               </div>
             </div>
           </div>
@@ -116,7 +165,7 @@ export function PlayerPage() {
       {activeTab === 'games' ? (
         <GameList games={playerGames} currentPlayerId={player.id} />
       ) : (
-        <Analytics statistics={statistics} />
+        statistics && <Analytics statistics={statistics} />
       )}
     </div>
   );

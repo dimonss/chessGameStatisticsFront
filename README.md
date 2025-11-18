@@ -20,6 +20,7 @@ A modern web application for tracking and analyzing chess games with comprehensi
 - **React Router** - Client-side routing
 - **Lucide React** - Beautiful icon library
 - **date-fns** - Date formatting utilities
+- **Backend API** - RESTful API for data persistence
 
 ## Getting Started
 
@@ -34,12 +35,21 @@ A modern web application for tracking and analyzing chess games with comprehensi
 npm install
 ```
 
-2. Start the development server:
+2. Make sure the backend server is running (see backend README for details):
+```bash
+cd ../chessGameStatisticsBack
+npm install
+npm run dev
+```
+
+3. Start the frontend development server:
 ```bash
 npm run dev
 ```
 
-3. Open your browser and navigate to `http://localhost:5173/chess_statistics`
+4. Open your browser and navigate to `http://localhost:5173/chess_statistics`
+
+**Note:** The frontend is configured to connect to the backend API at `http://localhost:3001` via a proxy during development. For production, set the `VITE_API_URL` environment variable to your backend API URL.
 
 ### Build for Production
 
@@ -92,16 +102,34 @@ src/
   ├── types/         # TypeScript types
   │   └── chess.ts
   ├── utils/         # Utility functions
+  │   ├── api.ts     # API client for backend communication
   │   └── statistics.ts
   ├── App.tsx        # Main app component
   ├── main.tsx       # Entry point
   └── index.css      # Global styles
 ```
 
+## Backend Integration
+
+The frontend is fully connected to the backend API. All data is fetched from the backend server running on `http://localhost:3001` (or the URL specified in `VITE_API_URL`).
+
+### API Configuration
+
+- **Development**: Uses Vite proxy configured in `vite.config.ts` to forward `/api` requests to `http://localhost:3001`
+- **Production**: Set `VITE_API_URL` environment variable to your backend API URL
+
+### API Endpoints Used
+
+- `GET /api/players` - Get all players
+- `GET /api/players/:id` - Get player by ID
+- `GET /api/games` - Get all games
+- `GET /api/games/:id` - Get game by ID
+- `GET /api/games/player/:playerId` - Get games for a player
+- `GET /api/games/player/:playerId/statistics` - Get player statistics
+
 ## Current Status
 
-The application currently uses mock data. Future enhancements could include:
-- Backend integration for persistent storage
+The application is fully functional with backend integration. Future enhancements could include:
 - User authentication
 - Real-time game import from chess platforms
 - Advanced analytics and visualizations
