@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { PlayerList } from '../components/PlayerList';
 import { playerAPI } from '../utils/api';
-import { Player } from '../types/chess';
+import { PlayerWithStats } from '../types/chess';
 import { Users, Loader2, AlertCircle } from 'lucide-react';
 
 export function PlayersPage() {
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<PlayerWithStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

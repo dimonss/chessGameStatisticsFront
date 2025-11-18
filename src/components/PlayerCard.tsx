@@ -1,43 +1,17 @@
-import { useState, useEffect } from 'react';
-import { Player, ChessGame } from '../types/chess';
+import { PlayerWithStats } from '../types/chess';
 import { User, TrendingUp, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { gameAPI } from '../utils/api';
 
 interface PlayerCardProps {
-  player: Player;
+  player: PlayerWithStats;
 }
 
 export function PlayerCard({ player }: PlayerCardProps) {
   const navigate = useNavigate();
-  const [playerGames, setPlayerGames] = useState<ChessGame[]>([]);
-  const [loading, setLoading] = useState(true);
   
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const games = await gameAPI.getByPlayerId(player.id);
-        setPlayerGames(games);
-      } catch (err) {
-        console.error('Error fetching player games:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchGames();
-  }, [player.id]);
-  
-  // Подсчитываем статистику для игрока
-  const wins = playerGames.filter(g => g.result === 'win').length;
-  const losses = playerGames.filter(g => g.result === 'loss').length;
-  const draws = playerGames.filter(g => g.result === 'draw').length;
-  const totalGames = playerGames.length;
-  const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
-  
-  // Получаем последний рейтинг
-  const latestGame = playerGames[0];
-  const currentRating = latestGame?.rating.after || player.rating;
+  // Используем статистику из пропсов (приходит с API)
+  const { stats } = player;
+  const { wins, losses, draws, totalGames, winRate, currentRating } = stats;
   
   // Определяем цвет карточки на основе рейтинга
   const getRatingColor = (rating: number) => {

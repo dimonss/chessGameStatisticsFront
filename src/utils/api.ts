@@ -1,4 +1,4 @@
-import { Player, ChessGame, GameStatistics } from '../types/chess';
+import { Player, PlayerWithStats, ChessGame, GameStatistics } from '../types/chess';
 
 // Use proxy in development (via vite.config.ts) or direct URL in production
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -18,8 +18,8 @@ async function fetchAPI<T>(endpoint: string): Promise<T> {
 
 // Player API
 export const playerAPI = {
-  getAll: async (): Promise<Player[]> => {
-    return fetchAPI<Player[]>('/players');
+  getAll: async (): Promise<PlayerWithStats[]> => {
+    return fetchAPI<PlayerWithStats[]>('/players');
   },
   
   getById: async (id: string): Promise<Player> => {

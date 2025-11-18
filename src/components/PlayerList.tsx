@@ -1,8 +1,8 @@
-import { Player } from '../types/chess';
+import { PlayerWithStats } from '../types/chess';
 import { PlayerCard } from './PlayerCard';
 
 interface PlayerListProps {
-  players: Player[];
+  players: PlayerWithStats[];
 }
 
 export function PlayerList({ players }: PlayerListProps) {
