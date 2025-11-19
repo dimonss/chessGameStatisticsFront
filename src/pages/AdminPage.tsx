@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ShieldCheck, Lock, Loader2, Edit3, Trash2, Plus, LogOut, AlertCircle } from 'lucide-react';
 import { PlayerForm } from '../components/PlayerForm';
+import { ConfirmModal } from '../components/ConfirmModal';
 import { playerAPI } from '../utils/api';
 import { PlayerWithStats, type PlayerFormValues } from '../types/chess';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +19,9 @@ export function AdminPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [playerToDelete, setPlayerToDelete] = useState<string | null>(null);
 
   const editingPlayer = useMemo(
     () => players.find(player => player.id === editingPlayerId),
@@ -57,6 +61,7 @@ export function AdminPage() {
   const handleLogout = () => {
     logout();
     setStatusMessage('Logged out.');
+    setShowLogoutModal(false);
   };
 
   const handleCreate = async (values: PlayerFormValues) => {
@@ -90,16 +95,25 @@ export function AdminPage() {
     }
   };
 
-  const handleDelete = async (playerId: string) => {
-    if (!authHeader) return;
-    const confirmed = window.confirm('Remove this player permanently?');
-    if (!confirmed) return;
+  const handleDeleteClick = (playerId: string) => {
+    if (!isAuthenticated) {
+      setStatusMessage('Please sign in to delete players.');
+      return;
+    }
+    setPlayerToDelete(playerId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!authHeader || !playerToDelete) return;
 
     try {
       setActionLoading(true);
-      await playerAPI.delete(playerId, authHeader);
+      await playerAPI.delete(playerToDelete, authHeader);
       await loadPlayers();
       setStatusMessage('Player deleted.');
+      setShowDeleteModal(false);
+      setPlayerToDelete(null);
     } catch (err) {
       setStatusMessage(err instanceof Error ? err.message : 'Failed to delete player');
     } finally {
@@ -233,7 +247,7 @@ export function AdminPage() {
                 Signed in as <span className="font-semibold text-gray-900">{username}</span>
               </div>
               <button
-                onClick={handleLogout}
+                onClick={() => setShowLogoutModal(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50"
               >
                 <LogOut className="w-4 h-4" /> Logout
@@ -323,13 +337,7 @@ export function AdminPage() {
                         Edit
                       </button>
                       <button
-                        onClick={() => {
-                          if (!isAuthenticated) {
-                            setStatusMessage('Please sign in to delete players.');
-                            return;
-                          }
-                          handleDelete(player.id);
-                        }}
+                        onClick={() => handleDeleteClick(player.id)}
                         className="flex items-center gap-1 text-rose-600 hover:text-rose-800 disabled:opacity-50"
                         disabled={!isAuthenticated || actionLoading}
                       >
@@ -346,6 +354,36 @@ export function AdminPage() {
       </section>
 
       {renderFormPanel()}
+
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+        title="Confirm Logout"
+        message="Are you sure you want to log out? You will need to authenticate again to perform admin actions."
+        confirmLabel="Logout"
+        cancelLabel="Cancel"
+        variant="warning"
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setPlayerToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Player"
+        message={
+          playerToDelete
+            ? `Are you sure you want to delete "${players.find(p => p.id === playerToDelete)?.name || 'this player'}"? This action cannot be undone.`
+            : 'Are you sure you want to delete this player? This action cannot be undone.'
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        loading={actionLoading}
+      />
     </div>
   );
 }

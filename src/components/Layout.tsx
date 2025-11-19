@@ -1,7 +1,8 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Users, Home, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { ConfirmModal } from './ConfirmModal';
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const { isAuthenticated, username, logout } = useAuth();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const navItems = [
     { path: '/', label: 'Players', icon: Users },
@@ -54,7 +56,7 @@ export function Layout({ children }: LayoutProps) {
                     {username}
                   </span>
                   <button
-                    onClick={logout}
+                    onClick={() => setShowLogoutModal(true)}
                     className="text-sm text-gray-600 border border-gray-200 rounded-xl px-3 py-1.5 hover:bg-gray-100"
                   >
                     Logout
@@ -69,6 +71,20 @@ export function Layout({ children }: LayoutProps) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
+
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={() => {
+          logout();
+          setShowLogoutModal(false);
+        }}
+        title="Confirm Logout"
+        message="Are you sure you want to log out? You will need to authenticate again to perform admin actions."
+        confirmLabel="Logout"
+        cancelLabel="Cancel"
+        variant="warning"
+      />
     </div>
   );
 }
