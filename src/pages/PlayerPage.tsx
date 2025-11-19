@@ -13,6 +13,7 @@ export function PlayerPage() {
   const [player, setPlayer] = useState<Player | null>(null);
   const [playerGames, setPlayerGames] = useState<ChessGame[]>([]);
   const [statistics, setStatistics] = useState<GameStatistics | null>(null);
+  const [opponents, setOpponents] = useState<Record<string, Player>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +34,24 @@ export function PlayerPage() {
         setPlayer(playerData);
         setPlayerGames(gamesData);
         setStatistics(statsData);
+
+        // Extract unique opponent IDs
+        const opponentIds = new Set<string>();
+        gamesData.forEach(game => opponentIds.add(game.opponentId));
+        statsData.recentGames.forEach(game => opponentIds.add(game.opponentId));
+
+        // Fetch opponents
+        const uniqueOpponentIds = Array.from(opponentIds);
+        const opponentsData = await Promise.all(
+          uniqueOpponentIds.map(opponentId => playerAPI.getById(opponentId))
+        );
+
+        const opponentsMap: Record<string, Player> = {};
+        opponentsData.forEach(opponent => {
+          opponentsMap[opponent.id] = opponent;
+        });
+        setOpponents(opponentsMap);
+
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load player data');
         console.error('Error fetching player data:', err);
@@ -163,9 +182,9 @@ export function PlayerPage() {
 
       {/* Content */}
       {activeTab === 'games' ? (
-        <GameList games={playerGames} currentPlayerId={player.id} />
+        <GameList games={playerGames} currentPlayerId={player.id} opponents={opponents} />
       ) : (
-        statistics && <Analytics statistics={statistics} />
+        statistics && <Analytics statistics={statistics} opponents={opponents} />
       )}
     </div>
   );

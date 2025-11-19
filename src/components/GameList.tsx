@@ -1,13 +1,14 @@
-import { ChessGame } from '../types/chess';
+import { ChessGame, Player } from '../types/chess';
 import { GameCard } from './GameCard';
 import { useNavigate } from 'react-router-dom';
 
 interface GameListProps {
   games: ChessGame[];
   currentPlayerId?: string;
+  opponents?: Record<string, Player>;
 }
 
-export function GameList({ games, currentPlayerId }: GameListProps) {
+export function GameList({ games, currentPlayerId, opponents }: GameListProps) {
   const navigate = useNavigate();
 
   return (
@@ -23,6 +24,7 @@ export function GameList({ games, currentPlayerId }: GameListProps) {
               game={game}
               currentPlayerId={currentPlayerId}
               onClick={() => navigate(`/game/${game.id}`)}
+              opponent={opponents ? opponents[game.opponentId] : undefined}
             />
           </div>
         ))

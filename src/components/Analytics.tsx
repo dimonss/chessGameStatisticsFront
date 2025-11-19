@@ -1,12 +1,13 @@
-import { GameStatistics } from '../types/chess';
+import { GameStatistics, Player } from '../types/chess';
 import { Trophy, TrendingUp, TrendingDown, Minus, BarChart3, Target, Award, Activity, Clock } from 'lucide-react';
 import { GameCard } from './GameCard';
 
 interface AnalyticsProps {
   statistics: GameStatistics;
+  opponents?: Record<string, Player>;
 }
 
-export function Analytics({ statistics }: AnalyticsProps) {
+export function Analytics({ statistics, opponents }: AnalyticsProps) {
   const statCards = [
     {
       label: 'Total Games',
@@ -55,8 +56,8 @@ export function Analytics({ statistics }: AnalyticsProps) {
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div 
-              key={stat.label} 
+            <div
+              key={stat.label}
               className={`relative overflow-hidden bg-gradient-to-br ${stat.bgGradient} rounded-2xl p-6 shadow-lg border border-white/50 hover:shadow-xl transition-all duration-300 hover:scale-105 animate-slide-up`}
               style={{ animationDelay: `${index * 100}ms` }}
             >
@@ -106,13 +107,12 @@ export function Analytics({ statistics }: AnalyticsProps) {
                 </div>
                 <p className="text-2xl font-bold text-gray-900">{statistics.averageRating}</p>
               </div>
-              <div className={`p-4 rounded-xl border ${
-                statistics.ratingChange > 0 
-                  ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-100' 
+              <div className={`p-4 rounded-xl border ${statistics.ratingChange > 0
+                  ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-100'
                   : statistics.ratingChange < 0
-                  ? 'bg-gradient-to-br from-rose-50 to-red-50 border-rose-100'
-                  : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'
-              }`}>
+                    ? 'bg-gradient-to-br from-rose-50 to-red-50 border-rose-100'
+                    : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'
+                }`}>
                 <div className="flex items-center gap-2 mb-1">
                   {statistics.ratingChange > 0 ? (
                     <TrendingUp className={`w-4 h-4 ${statistics.ratingChange > 0 ? 'text-emerald-600' : ''}`} />
@@ -121,17 +121,15 @@ export function Analytics({ statistics }: AnalyticsProps) {
                   ) : (
                     <Minus className="w-4 h-4 text-gray-600" />
                   )}
-                  <span className={`text-xs font-semibold uppercase tracking-wide ${
-                    statistics.ratingChange > 0 ? 'text-emerald-600' : 
-                    statistics.ratingChange < 0 ? 'text-rose-600' : 'text-gray-600'
-                  }`}>
+                  <span className={`text-xs font-semibold uppercase tracking-wide ${statistics.ratingChange > 0 ? 'text-emerald-600' :
+                      statistics.ratingChange < 0 ? 'text-rose-600' : 'text-gray-600'
+                    }`}>
                     Change
                   </span>
                 </div>
-                <p className={`text-2xl font-bold ${
-                  statistics.ratingChange > 0 ? 'text-emerald-600' : 
-                  statistics.ratingChange < 0 ? 'text-rose-600' : 'text-gray-600'
-                }`}>
+                <p className={`text-2xl font-bold ${statistics.ratingChange > 0 ? 'text-emerald-600' :
+                    statistics.ratingChange < 0 ? 'text-rose-600' : 'text-gray-600'
+                  }`}>
                   {statistics.ratingChange > 0 ? '+' : ''}{statistics.ratingChange}
                 </p>
               </div>
@@ -211,7 +209,10 @@ export function Analytics({ statistics }: AnalyticsProps) {
           <div className="space-y-4">
             {statistics.recentGames.map((game, index) => (
               <div key={game.id} style={{ animationDelay: `${index * 100}ms` }} className="animate-slide-up">
-                <GameCard game={game} />
+                <GameCard
+                  game={game}
+                  opponent={opponents ? opponents[game.opponentId] : undefined}
+                />
               </div>
             ))}
           </div>

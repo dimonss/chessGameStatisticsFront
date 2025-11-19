@@ -8,12 +8,18 @@ interface GameCardProps {
   game: ChessGame;
   onClick?: () => void;
   currentPlayerId?: string;
+  opponent?: Player;
 }
 
-export function GameCard({ game, onClick, currentPlayerId }: GameCardProps) {
-  const [opponent, setOpponent] = useState<Player | null>(null);
-  
+export function GameCard({ game, onClick, currentPlayerId, opponent: initialOpponent }: GameCardProps) {
+  const [opponent, setOpponent] = useState<Player | null>(initialOpponent || null);
+
   useEffect(() => {
+    if (initialOpponent) {
+      setOpponent(initialOpponent);
+      return;
+    }
+
     const fetchOpponent = async () => {
       try {
         const opponentData = await playerAPI.getById(game.opponentId);
@@ -22,10 +28,10 @@ export function GameCard({ game, onClick, currentPlayerId }: GameCardProps) {
         console.error('Error fetching opponent:', err);
       }
     };
-    
+
     fetchOpponent();
-  }, [game.opponentId]);
-  
+  }, [game.opponentId, initialOpponent]);
+
   const opponentName = opponent?.name || 'Loading...';
   const resultIcons = {
     win: <Trophy className="w-6 h-6 text-emerald-500" />,
@@ -45,11 +51,11 @@ export function GameCard({ game, onClick, currentPlayerId }: GameCardProps) {
     draw: 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white'
   };
 
-  const ratingChangeColor = game.rating.change > 0 
-    ? 'text-emerald-600 bg-emerald-50' 
-    : game.rating.change < 0 
-    ? 'text-rose-600 bg-rose-50' 
-    : 'text-gray-600 bg-gray-50';
+  const ratingChangeColor = game.rating.change > 0
+    ? 'text-emerald-600 bg-emerald-50'
+    : game.rating.change < 0
+      ? 'text-rose-600 bg-rose-50'
+      : 'text-gray-600 bg-gray-50';
 
   return (
     <div
@@ -58,7 +64,7 @@ export function GameCard({ game, onClick, currentPlayerId }: GameCardProps) {
     >
       {/* Decorative corner accent */}
       <div className={`absolute top-0 right-0 w-32 h-32 ${resultBadges[game.result]} opacity-10 rounded-bl-full transform translate-x-8 -translate-y-8`} />
-      
+
       <div className="relative p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -75,7 +81,7 @@ export function GameCard({ game, onClick, currentPlayerId }: GameCardProps) {
             {format(new Date(game.date), 'MMM dd, yyyy')}
           </span>
         </div>
-        
+
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <User className="w-4 h-4 text-gray-400" />
