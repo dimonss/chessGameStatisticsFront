@@ -16,14 +16,45 @@ async function fetchAPI<T>(endpoint: string): Promise<T> {
   return response.json();
 }
 
+const playerCache = new Map<string, Player>();
+const inFlightPlayerRequests = new Map<string, Promise<Player>>();
+
+const cachePlayer = (player: Player) => {
+  playerCache.set(player.id, player);
+};
+
 // Player API
 export const playerAPI = {
   getAll: async (): Promise<PlayerWithStats[]> => {
-    return fetchAPI<PlayerWithStats[]>('/players');
+    const players = await fetchAPI<PlayerWithStats[]>('/players');
+    players.forEach(cachePlayer);
+    return players;
   },
   
   getById: async (id: string): Promise<Player> => {
-    return fetchAPI<Player>(`/players/${id}`);
+    const cachedPlayer = playerCache.get(id);
+    if (cachedPlayer) {
+      return cachedPlayer;
+    }
+
+    const existingRequest = inFlightPlayerRequests.get(id);
+    if (existingRequest) {
+      return existingRequest;
+    }
+
+    const request = fetchAPI<Player>(`/players/${id}`)
+      .then(player => {
+        cachePlayer(player);
+        inFlightPlayerRequests.delete(id);
+        return player;
+      })
+      .catch(error => {
+        inFlightPlayerRequests.delete(id);
+        throw error;
+      });
+
+    inFlightPlayerRequests.set(id, request);
+    return request;
   }
 };
 
