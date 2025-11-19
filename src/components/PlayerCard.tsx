@@ -8,11 +8,11 @@ interface PlayerCardProps {
 
 export function PlayerCard({ player }: PlayerCardProps) {
   const navigate = useNavigate();
-  
+
   // Используем статистику из пропсов (приходит с API)
   const { stats } = player;
   const { wins, losses, draws, totalGames, winRate, currentRating } = stats;
-  
+
   // Определяем цвет карточки на основе рейтинга
   const getRatingColor = (rating: number) => {
     if (rating >= 2400) return 'from-purple-500 to-indigo-600';
@@ -29,12 +29,20 @@ export function PlayerCard({ player }: PlayerCardProps) {
     >
       {/* Decorative corner accent */}
       <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${getRatingColor(currentRating)} opacity-10 rounded-bl-full transform translate-x-8 -translate-y-8`} />
-      
+
       <div className="relative p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-xl bg-gradient-to-br ${getRatingColor(currentRating)} shadow-lg`}>
-              <User className="w-6 h-6 text-white" />
+            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getRatingColor(currentRating)} shadow-lg flex items-center justify-center overflow-hidden`}>
+              {player.avatar ? (
+                <img
+                  src={player.avatar}
+                  alt={player.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User className="w-6 h-6 text-white" />
+              )}
             </div>
             <div>
               <h3 className="font-bold text-xl text-gray-900 mb-1">{player.name}</h3>
@@ -42,7 +50,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
             </div>
           </div>
         </div>
-        
+
         <div className="mb-4">
           <div className="flex items-baseline gap-2 mb-2">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Rating</span>

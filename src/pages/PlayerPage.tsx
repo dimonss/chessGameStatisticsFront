@@ -19,17 +19,17 @@ export function PlayerPage() {
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
-      
+
       try {
         setLoading(true);
         setError(null);
-        
+
         const [playerData, gamesData, statsData] = await Promise.all([
           playerAPI.getById(id),
           gameAPI.getByPlayerId(id),
           gameAPI.getPlayerStatistics(id)
         ]);
-        
+
         setPlayer(playerData);
         setPlayerGames(gamesData);
         setStatistics(statsData);
@@ -107,8 +107,16 @@ export function PlayerPage() {
       {/* Player Header */}
       <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-lg border border-gray-200/50 mb-6">
         <div className="flex items-center gap-6">
-          <div className={`p-4 rounded-2xl bg-gradient-to-br ${getRatingColor(currentRating)} shadow-xl`}>
-            <User className="w-8 h-8 text-white" />
+          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getRatingColor(currentRating)} shadow-xl flex items-center justify-center overflow-hidden`}>
+            {player.avatar ? (
+              <img
+                src={player.avatar}
+                alt={player.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="w-8 h-8 text-white" />
+            )}
           </div>
           <div className="flex-1">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">{player.name}</h1>
@@ -139,22 +147,20 @@ export function PlayerPage() {
       <div className="flex gap-4 mb-6">
         <button
           onClick={() => setActiveTab('games')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-            activeTab === 'games'
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'games'
               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
               : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-          }`}
+            }`}
         >
           <Trophy className="w-5 h-5" />
           <span>Games</span>
         </button>
         <button
           onClick={() => setActiveTab('analytics')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
-            activeTab === 'analytics'
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'analytics'
               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
               : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-          }`}
+            }`}
         >
           <User className="w-5 h-5" />
           <span>Analytics</span>

@@ -17,20 +17,20 @@ export function GameDetails() {
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
-      
+
       try {
         setLoading(true);
         setError(null);
-        
+
         const gameData = await gameAPI.getById(id);
         setGame(gameData);
-        
+
         // Fetch player and opponent in parallel
         const [playerData, opponentData] = await Promise.all([
           playerAPI.getById(gameData.playerId),
           playerAPI.getById(gameData.opponentId)
         ]);
-        
+
         setPlayer(playerData);
         setOpponent(opponentData);
       } catch (err) {
@@ -111,7 +111,7 @@ export function GameDetails() {
 
       <div className={`relative overflow-hidden bg-gradient-to-br ${resultGradients[game.result]} border-2 rounded-3xl shadow-xl`}>
         <div className={`absolute top-0 right-0 w-64 h-64 ${resultBadges[game.result]} opacity-10 rounded-bl-full transform translate-x-16 -translate-y-16`} />
-        
+
         <div className="relative p-8">
           <div className="flex items-start justify-between mb-8">
             <div className="flex items-center gap-4">
@@ -131,8 +131,16 @@ export function GameDetails() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/50">
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600">
-                  <User className="w-5 h-5 text-white" />
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center overflow-hidden">
+                  {opponent?.avatar ? (
+                    <img
+                      src={opponent.avatar}
+                      alt={opponent.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-5 h-5 text-white" />
+                  )}
                 </div>
                 <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Opponent</p>
               </div>
@@ -190,13 +198,12 @@ export function GameDetails() {
                   <p className="text-3xl font-bold text-gray-900">{game.rating.after}</p>
                 </div>
               </div>
-              <div className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold shadow-lg ${
-                game.rating.change > 0 
-                  ? 'text-emerald-600 bg-emerald-50' 
-                  : game.rating.change < 0 
-                  ? 'text-rose-600 bg-rose-50' 
-                  : 'text-gray-600 bg-gray-50'
-              }`}>
+              <div className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold shadow-lg ${game.rating.change > 0
+                  ? 'text-emerald-600 bg-emerald-50'
+                  : game.rating.change < 0
+                    ? 'text-rose-600 bg-rose-50'
+                    : 'text-gray-600 bg-gray-50'
+                }`}>
                 {game.rating.change > 0 && <TrendingUp className="w-6 h-6" />}
                 {game.rating.change < 0 && <TrendingDown className="w-6 h-6" />}
                 <span className="text-xl">{game.rating.change > 0 ? '+' : ''}{game.rating.change}</span>
