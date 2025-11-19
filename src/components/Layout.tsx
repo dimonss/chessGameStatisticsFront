@@ -1,15 +1,19 @@
+import { type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Users, Home } from 'lucide-react';
+import { Users, Home, Shield } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const { isAuthenticated, username, logout } = useAuth();
 
   const navItems = [
-    { path: '/', label: 'Players', icon: Users }
+    { path: '/', label: 'Players', icon: Users },
+    { path: '/admin', label: 'Admin', icon: Shield }
   ];
 
   return (
@@ -44,6 +48,19 @@ export function Layout({ children }: LayoutProps) {
                   </Link>
                 );
               })}
+              {isAuthenticated && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600 bg-white/70 border border-gray-200 rounded-xl px-3 py-1.5">
+                    {username}
+                  </span>
+                  <button
+                    onClick={logout}
+                    className="text-sm text-gray-600 border border-gray-200 rounded-xl px-3 py-1.5 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -55,3 +55,10 @@ export interface PlayerWithStats extends Player {
   };
 }
 
+export interface PlayerFormValues {
+  name: string;
+  username: string;
+  rating: number;
+  avatar?: string;
+}
+
