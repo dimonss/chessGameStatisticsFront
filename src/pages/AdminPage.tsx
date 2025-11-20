@@ -3,6 +3,7 @@ import { ShieldCheck, Lock, Loader2, Edit3, Trash2, Plus, LogOut, AlertCircle, T
 import { PlayerForm } from '../components/PlayerForm';
 import { GameForm } from '../components/GameForm';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { Modal } from '../components/Modal';
 import { playerAPI, gameAPI } from '../utils/api';
 import { PlayerWithStats, type PlayerFormValues, type ChessGame } from '../types/chess';
 import { useAuth } from '../context/AuthContext';
@@ -234,19 +235,24 @@ export function AdminPage() {
     </div>
   );
 
-  const renderFormPanel = () => {
+  const renderModals = () => {
     if (!isAuthenticated) return null;
 
-    if (activeTab === 'players') {
-      if (formMode === 'edit' && editingPlayer) {
-        return (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Edit player</h3>
-                <p className="text-sm text-gray-500">Update profile information</p>
-              </div>
-            </div>
+    const isPlayerFormOpen = activeTab === 'players' && formMode !== null;
+    const isGameFormOpen = activeTab === 'games' && formMode !== null;
+
+    return (
+      <>
+        {/* Player Modal */}
+        <Modal
+          isOpen={isPlayerFormOpen}
+          onClose={() => {
+            setFormMode(null);
+            setEditingId(null);
+          }}
+          title={formMode === 'create' ? 'Add New Player' : 'Edit Player'}
+        >
+          {formMode === 'edit' && editingPlayer ? (
             <PlayerForm
               initialValues={{
                 name: editingPlayer.name,
@@ -262,37 +268,25 @@ export function AdminPage() {
                 setEditingId(null);
               }}
             />
-          </div>
-        );
-      }
-
-      if (formMode === 'create') {
-        return (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Add new player</h3>
-                <p className="text-sm text-gray-500">Create a new profile</p>
-              </div>
-            </div>
+          ) : (
             <PlayerForm
               loading={actionLoading}
               onSubmit={handleCreatePlayer}
               onCancel={() => setFormMode(null)}
             />
-          </div>
-        );
-      }
-    } else {
-      if (formMode === 'edit' && editingGame) {
-        return (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Edit game</h3>
-                <p className="text-sm text-gray-500">Update game details</p>
-              </div>
-            </div>
+          )}
+        </Modal>
+
+        {/* Game Modal */}
+        <Modal
+          isOpen={isGameFormOpen}
+          onClose={() => {
+            setFormMode(null);
+            setEditingId(null);
+          }}
+          title={formMode === 'create' ? 'Add New Game' : 'Edit Game'}
+        >
+          {formMode === 'edit' && editingGame ? (
             <GameForm
               initialValues={editingGame}
               submitLabel="Save changes"
@@ -303,30 +297,16 @@ export function AdminPage() {
                 setEditingId(null);
               }}
             />
-          </div>
-        );
-      }
-
-      if (formMode === 'create') {
-        return (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Add new game</h3>
-                <p className="text-sm text-gray-500">Record a new game</p>
-              </div>
-            </div>
+          ) : (
             <GameForm
               loading={actionLoading}
               onSubmit={handleCreateGame}
               onCancel={() => setFormMode(null)}
             />
-          </div>
-        );
-      }
-    }
-
-    return null;
+          )}
+        </Modal>
+      </>
+    );
   };
 
   if (loading) {
@@ -396,8 +376,8 @@ export function AdminPage() {
             setFormMode(null);
           }}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'players'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
+            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
             }`}
         >
           <User className="w-5 h-5" />
@@ -409,8 +389,8 @@ export function AdminPage() {
             setFormMode(null);
           }}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'games'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
+            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
             }`}
         >
           <Trophy className="w-5 h-5" />
@@ -515,9 +495,9 @@ export function AdminPage() {
                       <td className="px-6 py-4 font-medium">{blackPlayer?.name || 'Unknown'}</td>
                       <td className="px-6 py-4 capitalize">
                         <span className={`px-2 py-1 rounded-lg text-xs font-bold ${game.result === 'win' && game.color === 'white' ? 'bg-emerald-100 text-emerald-700' :
-                            game.result === 'loss' && game.color === 'black' ? 'bg-emerald-100 text-emerald-700' :
-                              game.result === 'draw' ? 'bg-amber-100 text-amber-700' :
-                                'bg-rose-100 text-rose-700'
+                          game.result === 'loss' && game.color === 'black' ? 'bg-emerald-100 text-emerald-700' :
+                            game.result === 'draw' ? 'bg-amber-100 text-amber-700' :
+                              'bg-rose-100 text-rose-700'
                           }`}>
                           {game.result === 'draw' ? 'Draw' :
                             (game.result === 'win' && game.color === 'white') || (game.result === 'loss' && game.color === 'black') ? 'White Win' : 'Black Win'}
@@ -560,7 +540,7 @@ export function AdminPage() {
         </div>
       </section>
 
-      {renderFormPanel()}
+      {renderModals()}
 
       <ConfirmModal
         isOpen={showLogoutModal}
