@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ShieldCheck, Lock, Loader2, Edit3, Trash2, Plus, LogOut, AlertCircle, Trophy, User } from 'lucide-react';
 import { PlayerForm } from '../components/PlayerForm';
 import { GameForm } from '../components/GameForm';
@@ -14,6 +15,7 @@ type Tab = 'players' | 'games';
 
 export function AdminPage() {
   const { isAuthenticated, username, authHeader, login, logout } = useAuth();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<Tab>('players');
 
   // Data state
@@ -58,7 +60,7 @@ export function AdminPage() {
       setPlayers(playersData);
       setGames(gamesData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load data');
+      setError(err instanceof Error ? err.message : t('common.error'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -75,15 +77,15 @@ export function AdminPage() {
       login(loginForm.username, loginForm.password);
       setLoginForm({ username: '', password: '' });
       setLoginError(null);
-      setStatusMessage('Authenticated successfully.');
+      setStatusMessage(t('admin.authSuccess'));
     } catch (err) {
-      setLoginError(err instanceof Error ? err.message : 'Failed to authenticate');
+      setLoginError(err instanceof Error ? err.message : t('common.error'));
     }
   };
 
   const handleLogout = () => {
     logout();
-    setStatusMessage('Logged out.');
+    setStatusMessage(t('app.logout'));
     setShowLogoutModal(false);
   };
 
@@ -94,10 +96,10 @@ export function AdminPage() {
       setActionLoading(true);
       await playerAPI.create(values, authHeader);
       await loadData();
-      setStatusMessage('Player created successfully.');
+      setStatusMessage(t('admin.createSuccess', { item: t('nav.players') }));
       setFormMode(null);
     } catch (err) {
-      setStatusMessage(err instanceof Error ? err.message : 'Failed to create player');
+      setStatusMessage(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setActionLoading(false);
     }
@@ -109,11 +111,11 @@ export function AdminPage() {
       setActionLoading(true);
       await playerAPI.update(editingId, values, authHeader);
       await loadData();
-      setStatusMessage('Player updated successfully.');
+      setStatusMessage(t('admin.updateSuccess', { item: t('nav.players') }));
       setFormMode(null);
       setEditingId(null);
     } catch (err) {
-      setStatusMessage(err instanceof Error ? err.message : 'Failed to update player');
+      setStatusMessage(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setActionLoading(false);
     }
@@ -125,11 +127,11 @@ export function AdminPage() {
       setActionLoading(true);
       await playerAPI.delete(itemToDelete, authHeader);
       await loadData();
-      setStatusMessage('Player deleted.');
+      setStatusMessage(t('admin.deleteSuccess', { item: t('nav.players') }));
       setShowDeleteModal(false);
       setItemToDelete(null);
     } catch (err) {
-      setStatusMessage(err instanceof Error ? err.message : 'Failed to delete player');
+      setStatusMessage(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setActionLoading(false);
     }
@@ -142,10 +144,10 @@ export function AdminPage() {
       setActionLoading(true);
       await gameAPI.create(values, authHeader);
       await loadData();
-      setStatusMessage('Game created successfully.');
+      setStatusMessage(t('admin.createSuccess', { item: t('nav.games') }));
       setFormMode(null);
     } catch (err) {
-      setStatusMessage(err instanceof Error ? err.message : 'Failed to create game');
+      setStatusMessage(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setActionLoading(false);
     }
@@ -157,11 +159,11 @@ export function AdminPage() {
       setActionLoading(true);
       await gameAPI.update(editingId, values, authHeader);
       await loadData();
-      setStatusMessage('Game updated successfully.');
+      setStatusMessage(t('admin.updateSuccess', { item: t('nav.games') }));
       setFormMode(null);
       setEditingId(null);
     } catch (err) {
-      setStatusMessage(err instanceof Error ? err.message : 'Failed to update game');
+      setStatusMessage(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setActionLoading(false);
     }
@@ -173,11 +175,11 @@ export function AdminPage() {
       setActionLoading(true);
       await gameAPI.delete(itemToDelete, authHeader);
       await loadData();
-      setStatusMessage('Game deleted.');
+      setStatusMessage(t('admin.deleteSuccess', { item: t('nav.games') }));
       setShowDeleteModal(false);
       setItemToDelete(null);
     } catch (err) {
-      setStatusMessage(err instanceof Error ? err.message : 'Failed to delete game');
+      setStatusMessage(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setActionLoading(false);
     }
@@ -185,7 +187,7 @@ export function AdminPage() {
 
   const handleDeleteClick = (id: string) => {
     if (!isAuthenticated) {
-      setStatusMessage('Please sign in to delete items.');
+      setStatusMessage(t('app.notAuthenticated'));
       return;
     }
     setItemToDelete(id);
@@ -199,13 +201,13 @@ export function AdminPage() {
           <Lock className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Admin access</h2>
-          <p className="text-gray-600 text-sm">Provide Basic Auth credentials</p>
+          <h2 className="text-2xl font-bold text-gray-900">{t('admin.access')}</h2>
+          <p className="text-gray-600 text-sm">{t('admin.credentials')}</p>
         </div>
       </div>
       <form onSubmit={handleLoginSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.username')}</label>
           <input
             type="text"
             value={loginForm.username}
@@ -215,7 +217,7 @@ export function AdminPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.password')}</label>
           <input
             type="password"
             value={loginForm.password}
@@ -229,11 +231,12 @@ export function AdminPage() {
           type="submit"
           className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
         >
-          Sign in
+          {t('app.signIn')}
         </button>
       </form>
     </div>
   );
+
 
   const renderModals = () => {
     if (!isAuthenticated) return null;
@@ -250,7 +253,7 @@ export function AdminPage() {
             setFormMode(null);
             setEditingId(null);
           }}
-          title={formMode === 'create' ? 'Add New Player' : 'Edit Player'}
+          title={formMode === 'create' ? t('admin.addPlayer') : t('admin.editPlayer')}
         >
           {formMode === 'edit' && editingPlayer ? (
             <PlayerForm
@@ -260,7 +263,7 @@ export function AdminPage() {
                 rating: editingPlayer.stats.currentRating,
                 avatar: editingPlayer.avatar
               }}
-              submitLabel="Save changes"
+              submitLabel={t('common.save')}
               loading={actionLoading}
               onSubmit={handleUpdatePlayer}
               onCancel={() => {
@@ -284,12 +287,12 @@ export function AdminPage() {
             setFormMode(null);
             setEditingId(null);
           }}
-          title={formMode === 'create' ? 'Add New Game' : 'Edit Game'}
+          title={formMode === 'create' ? t('admin.addGame') : t('admin.editGame')}
         >
           {formMode === 'edit' && editingGame ? (
             <GameForm
               initialValues={editingGame}
-              submitLabel="Save changes"
+              submitLabel={t('common.save')}
               loading={actionLoading}
               onSubmit={handleUpdateGame}
               onCancel={() => {
@@ -325,9 +328,9 @@ export function AdminPage() {
             <ShieldCheck className="w-8 h-8" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">Admin zone</h1>
+            <h1 className="text-4xl font-bold text-gray-900">{t('admin.title')}</h1>
             <p className="text-gray-600">
-              Manage player records and games. Authentication is required for sensitive actions.
+              {t('admin.subtitle')}
             </p>
           </div>
         </div>
@@ -341,13 +344,13 @@ export function AdminPage() {
                 onClick={() => setShowLogoutModal(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50"
               >
-                <LogOut className="w-4 h-4" /> Logout
+                <LogOut className="w-4 h-4" /> {t('app.logout')}
               </button>
             </>
           ) : (
             <div className="px-4 py-2 bg-white rounded-xl border border-gray-200 text-sm text-gray-600 flex items-center gap-2">
               <Lock className="w-4 h-4" />
-              Not authenticated
+              {t('app.notAuthenticated')}
             </div>
           )}
         </div>
@@ -381,7 +384,7 @@ export function AdminPage() {
             }`}
         >
           <User className="w-5 h-5" />
-          <span>Players</span>
+          <span>{t('nav.players')}</span>
         </button>
         <button
           onClick={() => {
@@ -394,20 +397,20 @@ export function AdminPage() {
             }`}
         >
           <Trophy className="w-5 h-5" />
-          <span>Games</span>
+          <span>{t('nav.games')}</span>
         </button>
       </div>
 
       <section className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 capitalize">{activeTab}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 capitalize">{t(`nav.${activeTab}`)}</h2>
             <p className="text-sm text-gray-500">Total: {activeTab === 'players' ? players.length : games.length}</p>
           </div>
           <button
             onClick={() => {
               if (!isAuthenticated) {
-                setStatusMessage(`Please sign in to add ${activeTab}.`);
+                setStatusMessage(t('app.notAuthenticated'));
                 return;
               }
               setFormMode('create');
@@ -417,7 +420,7 @@ export function AdminPage() {
             disabled={!isAuthenticated}
           >
             <Plus className="w-4 h-4" />
-            Add {activeTab === 'players' ? 'player' : 'game'}
+            {t('common.add')} {activeTab === 'players' ? t('nav.players') : t('nav.games')}
           </button>
         </div>
 
@@ -426,11 +429,11 @@ export function AdminPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  <th className="px-6 py-3">Name</th>
-                  <th className="px-6 py-3">Username</th>
-                  <th className="px-6 py-3">Rating</th>
-                  <th className="px-6 py-3">Games</th>
-                  <th className="px-6 py-3">Actions</th>
+                  <th className="px-6 py-3">{t('player.name')}</th>
+                  <th className="px-6 py-3">{t('player.username')}</th>
+                  <th className="px-6 py-3">{t('player.rating')}</th>
+                  <th className="px-6 py-3">{t('player.games')}</th>
+                  <th className="px-6 py-3">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -445,7 +448,7 @@ export function AdminPage() {
                         <button
                           onClick={() => {
                             if (!isAuthenticated) {
-                              setStatusMessage('Please sign in to edit players.');
+                              setStatusMessage(t('app.notAuthenticated'));
                               return;
                             }
                             setFormMode('edit');
@@ -455,7 +458,7 @@ export function AdminPage() {
                           disabled={!isAuthenticated || actionLoading}
                         >
                           <Edit3 className="w-4 h-4" />
-                          Edit
+                          {t('common.edit')}
                         </button>
                         <button
                           onClick={() => handleDeleteClick(player.id)}
@@ -463,7 +466,7 @@ export function AdminPage() {
                           disabled={!isAuthenticated || actionLoading}
                         >
                           <Trash2 className="w-4 h-4" />
-                          Delete
+                          {t('common.delete')}
                         </button>
                       </div>
                     </td>
@@ -475,12 +478,12 @@ export function AdminPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  <th className="px-6 py-3">Date</th>
-                  <th className="px-6 py-3">White</th>
-                  <th className="px-6 py-3">Black</th>
-                  <th className="px-6 py-3">Result</th>
-                  <th className="px-6 py-3">Moves</th>
-                  <th className="px-6 py-3">Actions</th>
+                  <th className="px-6 py-3">{t('game.date')}</th>
+                  <th className="px-6 py-3">{t('game.white')}</th>
+                  <th className="px-6 py-3">{t('game.black')}</th>
+                  <th className="px-6 py-3">{t('game.result')}</th>
+                  <th className="px-6 py-3">{t('game.moves')}</th>
+                  <th className="px-6 py-3">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -491,16 +494,16 @@ export function AdminPage() {
                   return (
                     <tr key={game.id} className="text-sm text-gray-700">
                       <td className="px-6 py-4">{format(new Date(game.date), 'MMM d, yyyy')}</td>
-                      <td className="px-6 py-4 font-medium">{whitePlayer?.name || 'Unknown'}</td>
-                      <td className="px-6 py-4 font-medium">{blackPlayer?.name || 'Unknown'}</td>
+                      <td className="px-6 py-4 font-medium">{whitePlayer?.name || t('common.unknown')}</td>
+                      <td className="px-6 py-4 font-medium">{blackPlayer?.name || t('common.unknown')}</td>
                       <td className="px-6 py-4 capitalize">
                         <span className={`px-2 py-1 rounded-lg text-xs font-bold ${game.result === 'win' && game.color === 'white' ? 'bg-emerald-100 text-emerald-700' :
                           game.result === 'loss' && game.color === 'black' ? 'bg-emerald-100 text-emerald-700' :
                             game.result === 'draw' ? 'bg-amber-100 text-amber-700' :
                               'bg-rose-100 text-rose-700'
                           }`}>
-                          {game.result === 'draw' ? 'Draw' :
-                            (game.result === 'win' && game.color === 'white') || (game.result === 'loss' && game.color === 'black') ? 'White Win' : 'Black Win'}
+                          {game.result === 'draw' ? t('game.draw') :
+                            (game.result === 'win' && game.color === 'white') || (game.result === 'loss' && game.color === 'black') ? t('game.whiteWin') : t('game.blackWin')}
                         </span>
                       </td>
                       <td className="px-6 py-4">{game.moves}</td>
@@ -509,7 +512,7 @@ export function AdminPage() {
                           <button
                             onClick={() => {
                               if (!isAuthenticated) {
-                                setStatusMessage('Please sign in to edit games.');
+                                setStatusMessage(t('app.notAuthenticated'));
                                 return;
                               }
                               setFormMode('edit');
@@ -519,7 +522,7 @@ export function AdminPage() {
                             disabled={!isAuthenticated || actionLoading}
                           >
                             <Edit3 className="w-4 h-4" />
-                            Edit
+                            {t('common.edit')}
                           </button>
                           <button
                             onClick={() => handleDeleteClick(game.id)}
@@ -527,7 +530,7 @@ export function AdminPage() {
                             disabled={!isAuthenticated || actionLoading}
                           >
                             <Trash2 className="w-4 h-4" />
-                            Delete
+                            {t('common.delete')}
                           </button>
                         </div>
                       </td>
@@ -546,10 +549,10 @@ export function AdminPage() {
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
         onConfirm={handleLogout}
-        title="Confirm Logout"
-        message="Are you sure you want to log out? You will need to authenticate again to perform admin actions."
-        confirmLabel="Logout"
-        cancelLabel="Cancel"
+        title={t('app.logout')}
+        message={t('admin.logoutConfirm')}
+        confirmLabel={t('app.logout')}
+        cancelLabel={t('common.cancel')}
         variant="warning"
       />
 
@@ -560,19 +563,16 @@ export function AdminPage() {
           setItemToDelete(null);
         }}
         onConfirm={activeTab === 'players' ? handleDeletePlayer : handleDeleteGame}
-        title={`Delete ${activeTab === 'players' ? 'Player' : 'Game'}`}
-        message={
-          itemToDelete
-            ? `Are you sure you want to delete this ${activeTab === 'players' ? 'player' : 'game'}? This action cannot be undone.`
-            : `Are you sure you want to delete this ${activeTab === 'players' ? 'player' : 'game'}? This action cannot be undone.`
-        }
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
+        title={`${t('common.delete')} ${activeTab === 'players' ? t('nav.players') : t('nav.games')}`}
+        message={t('admin.deleteConfirm', { item: activeTab === 'players' ? t('nav.players') : t('nav.games') })}
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
         variant="danger"
         loading={actionLoading}
       />
     </div>
   );
 }
+
 
 

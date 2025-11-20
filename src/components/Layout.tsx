@@ -1,8 +1,10 @@
 import { type ReactNode, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Users, Home, Shield } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { ConfirmModal } from './ConfirmModal';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,12 +12,13 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const { t } = useTranslation();
   const { isAuthenticated, username, logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const navItems = [
-    { path: '/', label: 'Players', icon: Users },
-    { path: '/admin', label: 'Admin', icon: Shield }
+    { path: '/', label: t('nav.players'), icon: Users },
+    { path: '/admin', label: t('app.admin'), icon: Shield }
   ];
 
   return (
@@ -28,10 +31,11 @@ export function Layout({ children }: LayoutProps) {
                 <Home className="w-6 h-6 text-white" />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Chess Statistics
+                {t('app.title')}
               </span>
             </div>
             <div className="flex items-center space-x-3">
+              <LanguageSwitcher />
               {navItems.map(item => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
@@ -39,11 +43,10 @@ export function Layout({ children }: LayoutProps) {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 font-medium ${
-                      isActive
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 font-medium ${isActive
                         ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50 scale-105'
                         : 'text-gray-600 hover:bg-gray-100/80 hover:scale-105'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-5 h-5" />
                     <span>{item.label}</span>
@@ -59,7 +62,7 @@ export function Layout({ children }: LayoutProps) {
                     onClick={() => setShowLogoutModal(true)}
                     className="text-sm text-gray-600 border border-gray-200 rounded-xl px-3 py-1.5 hover:bg-gray-100"
                   >
-                    Logout
+                    {t('app.logout')}
                   </button>
                 </div>
               )}
@@ -79,13 +82,14 @@ export function Layout({ children }: LayoutProps) {
           logout();
           setShowLogoutModal(false);
         }}
-        title="Confirm Logout"
-        message="Are you sure you want to log out? You will need to authenticate again to perform admin actions."
-        confirmLabel="Logout"
-        cancelLabel="Cancel"
+        title={t('app.logout')}
+        message={t('admin.logoutConfirm')}
+        confirmLabel={t('app.logout')}
+        cancelLabel={t('common.cancel')}
         variant="warning"
       />
     </div>
   );
 }
+
 

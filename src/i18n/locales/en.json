@@ -1,0 +1,79 @@
+{
+    "app": {
+        "title": "Chess Stats",
+        "subtitle": "Track your progress",
+        "admin": "Admin",
+        "logout": "Logout",
+        "signIn": "Sign in",
+        "notAuthenticated": "Not authenticated"
+    },
+    "nav": {
+        "players": "Players",
+        "games": "Games"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "save": "Save changes",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "add": "Add",
+        "actions": "Actions",
+        "confirm": "Confirm",
+        "unknown": "Unknown",
+        "search": "Search players..."
+    },
+    "player": {
+        "name": "Name",
+        "username": "Username",
+        "rating": "Rating",
+        "games": "Games",
+        "winRate": "Win Rate",
+        "wins": "Wins",
+        "losses": "Losses",
+        "draws": "Draws",
+        "totalGames": "Total Games",
+        "currentRating": "Current Rating",
+        "bestRating": "Best Rating",
+        "avatarUrl": "Avatar URL"
+    },
+    "game": {
+        "date": "Date",
+        "white": "White",
+        "black": "Black",
+        "result": "Result",
+        "moves": "Moves",
+        "opening": "Opening",
+        "timeControl": "Time Control",
+        "notes": "Notes",
+        "ratingChange": "Rating Change",
+        "whiteRating": "White Rating",
+        "blackRating": "Black Rating",
+        "win": "Win",
+        "loss": "Loss",
+        "draw": "Draw",
+        "whiteWin": "White Win",
+        "blackWin": "Black Win"
+    },
+    "admin": {
+        "title": "Admin zone",
+        "subtitle": "Manage player records and games. Authentication is required for sensitive actions.",
+        "access": "Admin access",
+        "credentials": "Provide Basic Auth credentials",
+        "username": "Username",
+        "password": "Password",
+        "addPlayer": "Add player",
+        "addGame": "Add game",
+        "editPlayer": "Edit player",
+        "editGame": "Edit game",
+        "deletePlayer": "Delete Player",
+        "deleteGame": "Delete Game",
+        "deleteConfirm": "Are you sure you want to delete this {{item}}? This action cannot be undone.",
+        "createSuccess": "{{item}} created successfully.",
+        "updateSuccess": "{{item}} updated successfully.",
+        "deleteSuccess": "{{item}} deleted.",
+        "authSuccess": "Authenticated successfully.",
+        "logoutConfirm": "Are you sure you want to log out? You will need to authenticate again to perform admin actions."
+    }
+}

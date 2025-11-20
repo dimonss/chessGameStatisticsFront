@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ChessGame, PlayerWithStats } from '../types/chess';
 import { playerAPI } from '../utils/api';
 
@@ -29,11 +30,12 @@ const emptyValues: Partial<ChessGame> = {
 
 export function GameForm({
     initialValues,
-    submitLabel = 'Save game',
+    submitLabel,
     loading = false,
     onSubmit,
     onCancel
 }: GameFormProps) {
+    const { t } = useTranslation();
     const [values, setValues] = useState<Partial<ChessGame>>(initialValues ?? emptyValues);
     const [players, setPlayers] = useState<PlayerWithStats[]>([]);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -81,11 +83,11 @@ export function GameForm({
     const validate = () => {
         const nextErrors: Record<string, string> = {};
 
-        if (!values.date) nextErrors.date = 'Date is required';
-        if (!values.playerId) nextErrors.playerId = 'Player is required';
-        if (!values.opponentId) nextErrors.opponentId = 'Opponent is required';
-        if (values.playerId === values.opponentId) nextErrors.opponentId = 'Player and opponent cannot be the same';
-        if (!values.moves || values.moves <= 0) nextErrors.moves = 'Moves must be positive';
+        if (!values.date) nextErrors.date = t('validation.required');
+        if (!values.playerId) nextErrors.playerId = t('validation.required');
+        if (!values.opponentId) nextErrors.opponentId = t('validation.required');
+        if (values.playerId === values.opponentId) nextErrors.opponentId = t('validation.samePlayer');
+        if (!values.moves || values.moves <= 0) nextErrors.moves = t('validation.positive');
 
         setErrors(nextErrors);
         return Object.keys(nextErrors).length === 0;
@@ -101,7 +103,7 @@ export function GameForm({
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('game.date')}</label>
                     <input
                         type="date"
                         value={values.date}
@@ -113,7 +115,7 @@ export function GameForm({
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Time Control</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('game.timeControl')}</label>
                     <select
                         value={values.timeControl}
                         onChange={e => handleChange('timeControl', e.target.value)}
@@ -128,14 +130,14 @@ export function GameForm({
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Player (White/Black based on color)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('game.player')}</label>
                     <select
                         value={values.playerId}
                         onChange={e => handleChange('playerId', e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
                         disabled={loading}
                     >
-                        <option value="">Select Player</option>
+                        <option value="">{t('common.select')}</option>
                         {players.map(p => (
                             <option key={p.id} value={p.id}>{p.name} (@{p.username})</option>
                         ))}
@@ -144,14 +146,14 @@ export function GameForm({
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Opponent</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('game.opponent')}</label>
                     <select
                         value={values.opponentId}
                         onChange={e => handleChange('opponentId', e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
                         disabled={loading}
                     >
-                        <option value="">Select Opponent</option>
+                        <option value="">{t('common.select')}</option>
                         {players.map(p => (
                             <option key={p.id} value={p.id}>{p.name} (@{p.username})</option>
                         ))}
@@ -160,34 +162,34 @@ export function GameForm({
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Result</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('game.result')}</label>
                     <select
                         value={values.result}
                         onChange={e => handleChange('result', e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
                         disabled={loading}
                     >
-                        <option value="win">Win</option>
-                        <option value="loss">Loss</option>
-                        <option value="draw">Draw</option>
+                        <option value="win">{t('game.win')}</option>
+                        <option value="loss">{t('game.loss')}</option>
+                        <option value="draw">{t('game.draw')}</option>
                     </select>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Color (for Player)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('game.color')}</label>
                     <select
                         value={values.color}
                         onChange={e => handleChange('color', e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
                         disabled={loading}
                     >
-                        <option value="white">White</option>
-                        <option value="black">Black</option>
+                        <option value="white">{t('game.white')}</option>
+                        <option value="black">{t('game.black')}</option>
                     </select>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Moves</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('game.moves')}</label>
                     <input
                         type="number"
                         value={values.moves}
@@ -200,7 +202,7 @@ export function GameForm({
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Opening</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('game.opening')}</label>
                     <input
                         type="text"
                         value={values.opening || ''}
@@ -213,10 +215,10 @@ export function GameForm({
             </div>
 
             <div className="border-t border-gray-200 pt-4 mt-4">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Rating Changes (for Player)</h4>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">{t('game.ratingChange')}</h4>
                 <div className="grid grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Before</label>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">{t('game.ratingBefore')}</label>
                         <input
                             type="number"
                             value={values.rating?.before}
@@ -226,7 +228,7 @@ export function GameForm({
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">After</label>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">{t('game.ratingAfter')}</label>
                         <input
                             type="number"
                             value={values.rating?.after}
@@ -236,7 +238,7 @@ export function GameForm({
                         />
                     </div>
                     <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Change</label>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">{t('game.ratingDiff')}</label>
                         <input
                             type="number"
                             value={values.rating?.change}
@@ -249,12 +251,12 @@ export function GameForm({
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('game.notes')}</label>
                 <textarea
                     value={values.notes || ''}
                     onChange={e => handleChange('notes', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 h-24"
-                    placeholder="Game analysis or comments..."
+                    placeholder={t('game.notesPlaceholder')}
                     disabled={loading}
                 />
             </div>
@@ -265,7 +267,7 @@ export function GameForm({
                     disabled={loading}
                     className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                    {loading ? 'Saving...' : submitLabel}
+                    {loading ? t('common.saving') : (submitLabel || t('common.save'))}
                 </button>
                 {onCancel && (
                     <button
@@ -274,10 +276,11 @@ export function GameForm({
                         disabled={loading}
                         className="px-5 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-70"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                 )}
             </div>
         </form>
     );
 }
+

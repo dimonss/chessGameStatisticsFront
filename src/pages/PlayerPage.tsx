@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { playerAPI, gameAPI } from '../utils/api';
 import { Player, ChessGame, GameStatistics } from '../types/chess';
 import { GameList } from '../components/GameList';
@@ -9,6 +10,7 @@ import { ArrowLeft, User, Trophy, Loader2, AlertCircle } from 'lucide-react';
 export function PlayerPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'games' | 'analytics'>('games');
   const [player, setPlayer] = useState<Player | null>(null);
   const [playerGames, setPlayerGames] = useState<ChessGame[]>([]);
@@ -34,7 +36,7 @@ export function PlayerPage() {
         setPlayerGames(gamesData);
         setStatistics(statsData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load player data');
+        setError(err instanceof Error ? err.message : t('common.error'));
         console.error('Error fetching player data:', err);
       } finally {
         setLoading(false);
@@ -42,14 +44,14 @@ export function PlayerPage() {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, t]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px] animate-fade-in">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading player data...</p>
+          <p className="text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -62,17 +64,17 @@ export function PlayerPage() {
           {error ? (
             <>
               <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-4" />
-              <p className="text-gray-700 mb-2 font-semibold">Error loading player</p>
+              <p className="text-gray-700 mb-2 font-semibold">{t('common.error')}</p>
               <p className="text-gray-500 text-sm mb-6">{error}</p>
             </>
           ) : (
-            <p className="text-gray-500 mb-6 text-lg">Player not found</p>
+            <p className="text-gray-500 mb-6 text-lg">{t('common.unknown')}</p>
           )}
           <button
             onClick={() => navigate('/')}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
           >
-            Back to Players
+            {t('nav.players')}
           </button>
         </div>
       </div>
@@ -101,7 +103,7 @@ export function PlayerPage() {
         <div className="p-2 rounded-lg bg-white shadow-md group-hover:shadow-lg transition-all">
           <ArrowLeft className="w-5 h-5" />
         </div>
-        <span className="font-medium">Back to Players</span>
+        <span className="font-medium">{t('nav.players')}</span>
       </button>
 
       {/* Player Header */}
@@ -123,17 +125,17 @@ export function PlayerPage() {
             <p className="text-lg text-gray-600 mb-4">@{player.username}</p>
             <div className="flex items-center gap-6">
               <div>
-                <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Current Rating</span>
+                <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">{t('player.currentRating')}</span>
                 <p className={`text-3xl font-bold bg-gradient-to-r ${getRatingColor(currentRating)} bg-clip-text text-transparent`}>
                   {currentRating}
                 </p>
               </div>
               <div>
-                <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Games</span>
+                <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">{t('player.totalGames')}</span>
                 <p className="text-3xl font-bold text-gray-900">{statistics ? statistics.totalGames : 0}</p>
               </div>
               <div>
-                <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Win Rate</span>
+                <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">{t('player.winRate')}</span>
                 <p className="text-3xl font-bold text-emerald-600">
                   {statistics ? statistics.winRate.toFixed(1) : '0.0'}%
                 </p>
@@ -148,18 +150,18 @@ export function PlayerPage() {
         <button
           onClick={() => setActiveTab('games')}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'games'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
+            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
             }`}
         >
           <Trophy className="w-5 h-5" />
-          <span>Games</span>
+          <span>{t('nav.games')}</span>
         </button>
         <button
           onClick={() => setActiveTab('analytics')}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'analytics'
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
+            : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
             }`}
         >
           <User className="w-5 h-5" />
@@ -176,4 +178,5 @@ export function PlayerPage() {
     </div>
   );
 }
+
 

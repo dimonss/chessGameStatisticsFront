@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { PlayerFormValues } from '../types/chess';
 
 interface PlayerFormProps {
@@ -18,11 +19,12 @@ const emptyValues: PlayerFormValues = {
 
 export function PlayerForm({
   initialValues,
-  submitLabel = 'Save player',
+  submitLabel,
   loading = false,
   onSubmit,
   onCancel
 }: PlayerFormProps) {
+  const { t } = useTranslation();
   const [values, setValues] = useState<PlayerFormValues>(initialValues ?? emptyValues);
   const [errors, setErrors] = useState<Partial<Record<keyof PlayerFormValues, string>>>({});
 
@@ -41,13 +43,13 @@ export function PlayerForm({
     const nextErrors: typeof errors = {};
 
     if (!values.name.trim()) {
-      nextErrors.name = 'Name is required';
+      nextErrors.name = t('validation.required');
     }
     if (!values.username.trim()) {
-      nextErrors.username = 'Username is required';
+      nextErrors.username = t('validation.required');
     }
     if (!Number.isFinite(values.rating) || values.rating <= 0) {
-      nextErrors.rating = 'Rating must be positive';
+      nextErrors.rating = t('validation.positive');
     }
 
     setErrors(nextErrors);
@@ -70,7 +72,7 @@ export function PlayerForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t('player.name')}</label>
         <input
           type="text"
           value={values.name}
@@ -83,7 +85,7 @@ export function PlayerForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t('player.username')}</label>
         <input
           type="text"
           value={values.username}
@@ -96,7 +98,7 @@ export function PlayerForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t('player.rating')}</label>
         <input
           type="number"
           value={values.rating}
@@ -110,7 +112,7 @@ export function PlayerForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">{t('player.avatarUrl')}</label>
         <input
           type="url"
           value={values.avatar ?? ''}
@@ -127,7 +129,7 @@ export function PlayerForm({
           disabled={loading}
           className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {loading ? 'Saving...' : submitLabel}
+          {loading ? t('common.saving') : (submitLabel || t('common.save'))}
         </button>
         {onCancel && (
           <button
@@ -136,12 +138,13 @@ export function PlayerForm({
             disabled={loading}
             className="px-5 py-2.5 border border-gray-300 rounded-xl font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-70"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
         )}
       </div>
     </form>
   );
 }
+
 
 

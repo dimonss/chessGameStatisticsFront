@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { PlayerWithStats } from '../types/chess';
 import { User, TrendingUp, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +9,7 @@ interface PlayerCardProps {
 
 export function PlayerCard({ player }: PlayerCardProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Используем статистику из пропсов (приходит с API)
   const { stats } = player;
@@ -53,7 +55,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
 
         <div className="mb-4">
           <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Rating</span>
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('player.rating')}</span>
             <span className={`text-3xl font-bold bg-gradient-to-r ${getRatingColor(currentRating)} bg-clip-text text-transparent`}>
               {currentRating}
             </span>
@@ -66,29 +68,29 @@ export function PlayerCard({ player }: PlayerCardProps) {
               <Award className="w-4 h-4 text-emerald-500" />
               <span className="text-lg font-bold text-gray-900">{wins}</span>
             </div>
-            <p className="text-xs text-gray-500">Wins</p>
+            <p className="text-xs text-gray-500">{t('player.wins')}</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
               <TrendingUp className="w-4 h-4 text-rose-500" />
               <span className="text-lg font-bold text-gray-900">{losses}</span>
             </div>
-            <p className="text-xs text-gray-500">Losses</p>
+            <p className="text-xs text-gray-500">{t('player.losses')}</p>
           </div>
           <div className="text-center">
             <span className="text-lg font-bold text-gray-900 block mb-1">{draws}</span>
-            <p className="text-xs text-gray-500">Draws</p>
+            <p className="text-xs text-gray-500">{t('player.draws')}</p>
           </div>
         </div>
 
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Games</span>
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('player.totalGames')}</span>
             <span className="font-bold text-lg text-gray-900">{totalGames}</span>
           </div>
           <div className="mt-2">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-gray-600">Win Rate</span>
+              <span className="text-xs text-gray-600">{t('player.winRate')}</span>
               <span className="text-sm font-bold text-emerald-600">{winRate.toFixed(1)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -103,4 +105,5 @@ export function PlayerCard({ player }: PlayerCardProps) {
     </div>
   );
 }
+
 

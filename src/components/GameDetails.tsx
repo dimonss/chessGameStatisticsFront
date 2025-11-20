@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { gameAPI, playerAPI } from '../utils/api';
 import { ChessGame, Player } from '../types/chess';
 import { format } from 'date-fns';
@@ -8,8 +9,8 @@ import { ArrowLeft, Trophy, TrendingDown, TrendingUp, Minus, User, Clock, Move, 
 export function GameDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [game, setGame] = useState<ChessGame | null>(null);
-  const [player, setPlayer] = useState<Player | null>(null);
   const [opponent, setOpponent] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,16 +26,12 @@ export function GameDetails() {
         const gameData = await gameAPI.getById(id);
         setGame(gameData);
 
-        // Fetch player and opponent in parallel
-        const [playerData, opponentData] = await Promise.all([
-          playerAPI.getById(gameData.playerId),
-          playerAPI.getById(gameData.opponentId)
-        ]);
+        // Fetch opponent
+        const opponentData = await playerAPI.getById(gameData.opponentId);
 
-        setPlayer(playerData);
         setOpponent(opponentData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load game data');
+        setError(err instanceof Error ? err.message : t('common.error'));
         console.error('Error fetching game data:', err);
       } finally {
         setLoading(false);
@@ -42,14 +39,14 @@ export function GameDetails() {
     };
 
     fetchData();
-  }, [id]);
+  }, [id, t]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px] animate-fade-in">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading game details...</p>
+          <p className="text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -62,17 +59,17 @@ export function GameDetails() {
           {error ? (
             <>
               <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-4" />
-              <p className="text-gray-700 mb-2 font-semibold">Error loading game</p>
+              <p className="text-gray-700 mb-2 font-semibold">{t('common.error')}</p>
               <p className="text-gray-500 text-sm mb-6">{error}</p>
             </>
           ) : (
-            <p className="text-gray-500 mb-6 text-lg">Game not found</p>
+            <p className="text-gray-500 mb-6 text-lg">{t('common.unknown')}</p>
           )}
           <button
             onClick={() => navigate('/')}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
           >
-            Back to Players
+            {t('nav.players')}
           </button>
         </div>
       </div>
@@ -106,7 +103,7 @@ export function GameDetails() {
         <div className="p-2 rounded-lg bg-white shadow-md group-hover:shadow-lg transition-all">
           <ArrowLeft className="w-5 h-5" />
         </div>
-        <span className="font-medium">Back to {player?.name || 'Players'}</span>
+        <span className="font-medium">{t('nav.players')}</span>
       </button>
 
       <div className={`relative overflow-hidden bg-gradient-to-br ${resultGradients[game.result]} border-2 rounded-3xl shadow-xl`}>
@@ -119,7 +116,7 @@ export function GameDetails() {
                 {resultIcons[game.result]}
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2 capitalize">{game.result}</h1>
+                <h1 className="text-4xl font-bold text-gray-900 mb-2 capitalize">{t(`game.${game.result}`)}</h1>
                 <div className="flex items-center gap-2 text-gray-600">
                   <Calendar className="w-4 h-4" />
                   <span className="font-medium">{format(new Date(game.date), 'MMMM dd, yyyy')}</span>
@@ -144,7 +141,7 @@ export function GameDetails() {
                 </div>
                 <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Opponent</p>
               </div>
-              <p className="font-bold text-2xl text-gray-900">{opponent?.name || 'Unknown'}</p>
+              <p className="font-bold text-2xl text-gray-900">{opponent?.name || t('common.unknown')}</p>
               <p className="text-sm text-gray-500 mt-1">@{opponent?.username || 'unknown'}</p>
             </div>
 
@@ -155,7 +152,7 @@ export function GameDetails() {
                 </div>
                 <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Color</p>
               </div>
-              <p className="font-bold text-2xl text-gray-900 capitalize">{game.color}</p>
+              <p className="font-bold text-2xl text-gray-900 capitalize">{t(`game.${game.color}`)}</p>
             </div>
 
             <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/50">
@@ -163,7 +160,7 @@ export function GameDetails() {
                 <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
-                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Time Control</p>
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">{t('game.timeControl')}</p>
               </div>
               <p className="font-bold text-2xl text-gray-900 capitalize">{game.timeControl}</p>
             </div>
@@ -173,7 +170,7 @@ export function GameDetails() {
                 <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600">
                   <Move className="w-5 h-5 text-white" />
                 </div>
-                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Moves</p>
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">{t('game.moves')}</p>
               </div>
               <p className="font-bold text-2xl text-gray-900">{game.moves}</p>
             </div>
@@ -184,7 +181,7 @@ export function GameDetails() {
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
                 <Target className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Rating</h3>
+              <h3 className="text-xl font-bold text-gray-900">{t('game.ratingChange')}</h3>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-baseline gap-4">
@@ -199,10 +196,10 @@ export function GameDetails() {
                 </div>
               </div>
               <div className={`flex items-center gap-2 px-5 py-3 rounded-xl font-bold shadow-lg ${game.rating.change > 0
-                  ? 'text-emerald-600 bg-emerald-50'
-                  : game.rating.change < 0
-                    ? 'text-rose-600 bg-rose-50'
-                    : 'text-gray-600 bg-gray-50'
+                ? 'text-emerald-600 bg-emerald-50'
+                : game.rating.change < 0
+                  ? 'text-rose-600 bg-rose-50'
+                  : 'text-gray-600 bg-gray-50'
                 }`}>
                 {game.rating.change > 0 && <TrendingUp className="w-6 h-6" />}
                 {game.rating.change < 0 && <TrendingDown className="w-6 h-6" />}
@@ -213,7 +210,7 @@ export function GameDetails() {
 
           {game.opening && (
             <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/50 mb-6">
-              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Opening</p>
+              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('game.opening')}</p>
               <p className="font-bold text-xl text-gray-900 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 {game.opening}
               </p>
@@ -222,7 +219,7 @@ export function GameDetails() {
 
           {game.notes && (
             <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/50">
-              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Notes</p>
+              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">{t('game.notes')}</p>
               <p className="text-gray-800 leading-relaxed">{game.notes}</p>
             </div>
           )}
@@ -231,4 +228,5 @@ export function GameDetails() {
     </div>
   );
 }
+
 
