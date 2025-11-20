@@ -1,41 +1,63 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ShieldCheck, Lock, Loader2, Edit3, Trash2, Plus, LogOut, AlertCircle } from 'lucide-react';
+import { ShieldCheck, Lock, Loader2, Edit3, Trash2, Plus, LogOut, AlertCircle, Trophy, User } from 'lucide-react';
 import { PlayerForm } from '../components/PlayerForm';
+import { GameForm } from '../components/GameForm';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { playerAPI } from '../utils/api';
-import { PlayerWithStats, type PlayerFormValues } from '../types/chess';
+import { playerAPI, gameAPI } from '../utils/api';
+import { PlayerWithStats, type PlayerFormValues, type ChessGame } from '../types/chess';
 import { useAuth } from '../context/AuthContext';
+import { format } from 'date-fns';
 
 type FormMode = 'create' | 'edit' | null;
+type Tab = 'players' | 'games';
 
 export function AdminPage() {
   const { isAuthenticated, username, authHeader, login, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState<Tab>('players');
+
+  // Data state
   const [players, setPlayers] = useState<PlayerWithStats[]>([]);
+  const [games, setGames] = useState<ChessGame[]>([]);
+
+  // UI state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [formMode, setFormMode] = useState<FormMode>(null);
-  const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Login state
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Modals
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [playerToDelete, setPlayerToDelete] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   const editingPlayer = useMemo(
-    () => players.find(player => player.id === editingPlayerId),
-    [players, editingPlayerId]
+    () => players.find(player => player.id === editingId),
+    [players, editingId]
   );
 
-  const loadPlayers = async () => {
+  const editingGame = useMemo(
+    () => games.find(game => game.id === editingId),
+    [games, editingId]
+  );
+
+  const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await playerAPI.getAll();
-      setPlayers(data);
+      const [playersData, gamesData] = await Promise.all([
+        playerAPI.getAll(),
+        gameAPI.getAll()
+      ]);
+      setPlayers(playersData);
+      setGames(gamesData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load players');
+      setError(err instanceof Error ? err.message : 'Failed to load data');
       console.error(err);
     } finally {
       setLoading(false);
@@ -43,7 +65,7 @@ export function AdminPage() {
   };
 
   useEffect(() => {
-    loadPlayers();
+    loadData();
   }, []);
 
   const handleLoginSubmit = (event: React.FormEvent) => {
@@ -64,12 +86,13 @@ export function AdminPage() {
     setShowLogoutModal(false);
   };
 
-  const handleCreate = async (values: PlayerFormValues) => {
+  // Player Actions
+  const handleCreatePlayer = async (values: PlayerFormValues) => {
     if (!authHeader) return;
     try {
       setActionLoading(true);
       await playerAPI.create(values, authHeader);
-      await loadPlayers();
+      await loadData();
       setStatusMessage('Player created successfully.');
       setFormMode(null);
     } catch (err) {
@@ -79,15 +102,15 @@ export function AdminPage() {
     }
   };
 
-  const handleUpdate = async (values: PlayerFormValues) => {
-    if (!authHeader || !editingPlayerId) return;
+  const handleUpdatePlayer = async (values: PlayerFormValues) => {
+    if (!authHeader || !editingId) return;
     try {
       setActionLoading(true);
-      await playerAPI.update(editingPlayerId, values, authHeader);
-      await loadPlayers();
+      await playerAPI.update(editingId, values, authHeader);
+      await loadData();
       setStatusMessage('Player updated successfully.');
       setFormMode(null);
-      setEditingPlayerId(null);
+      setEditingId(null);
     } catch (err) {
       setStatusMessage(err instanceof Error ? err.message : 'Failed to update player');
     } finally {
@@ -95,30 +118,77 @@ export function AdminPage() {
     }
   };
 
-  const handleDeleteClick = (playerId: string) => {
-    if (!isAuthenticated) {
-      setStatusMessage('Please sign in to delete players.');
-      return;
-    }
-    setPlayerToDelete(playerId);
-    setShowDeleteModal(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!authHeader || !playerToDelete) return;
-
+  const handleDeletePlayer = async () => {
+    if (!authHeader || !itemToDelete) return;
     try {
       setActionLoading(true);
-      await playerAPI.delete(playerToDelete, authHeader);
-      await loadPlayers();
+      await playerAPI.delete(itemToDelete, authHeader);
+      await loadData();
       setStatusMessage('Player deleted.');
       setShowDeleteModal(false);
-      setPlayerToDelete(null);
+      setItemToDelete(null);
     } catch (err) {
       setStatusMessage(err instanceof Error ? err.message : 'Failed to delete player');
     } finally {
       setActionLoading(false);
     }
+  };
+
+  // Game Actions
+  const handleCreateGame = async (values: Partial<ChessGame>) => {
+    if (!authHeader) return;
+    try {
+      setActionLoading(true);
+      await gameAPI.create(values, authHeader);
+      await loadData();
+      setStatusMessage('Game created successfully.');
+      setFormMode(null);
+    } catch (err) {
+      setStatusMessage(err instanceof Error ? err.message : 'Failed to create game');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleUpdateGame = async (values: Partial<ChessGame>) => {
+    if (!authHeader || !editingId) return;
+    try {
+      setActionLoading(true);
+      await gameAPI.update(editingId, values, authHeader);
+      await loadData();
+      setStatusMessage('Game updated successfully.');
+      setFormMode(null);
+      setEditingId(null);
+    } catch (err) {
+      setStatusMessage(err instanceof Error ? err.message : 'Failed to update game');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteGame = async () => {
+    if (!authHeader || !itemToDelete) return;
+    try {
+      setActionLoading(true);
+      await gameAPI.delete(itemToDelete, authHeader);
+      await loadData();
+      setStatusMessage('Game deleted.');
+      setShowDeleteModal(false);
+      setItemToDelete(null);
+    } catch (err) {
+      setStatusMessage(err instanceof Error ? err.message : 'Failed to delete game');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    if (!isAuthenticated) {
+      setStatusMessage('Please sign in to delete items.');
+      return;
+    }
+    setItemToDelete(id);
+    setShowDeleteModal(true);
   };
 
   const renderLoginPanel = () => (
@@ -165,54 +235,95 @@ export function AdminPage() {
   );
 
   const renderFormPanel = () => {
-    if (!isAuthenticated) {
-      return null;
-    }
+    if (!isAuthenticated) return null;
 
-    if (formMode === 'edit' && editingPlayer) {
-      return (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900">Edit player</h3>
-              <p className="text-sm text-gray-500">Update profile information</p>
+    if (activeTab === 'players') {
+      if (formMode === 'edit' && editingPlayer) {
+        return (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Edit player</h3>
+                <p className="text-sm text-gray-500">Update profile information</p>
+              </div>
             </div>
+            <PlayerForm
+              initialValues={{
+                name: editingPlayer.name,
+                username: editingPlayer.username,
+                rating: editingPlayer.stats.currentRating,
+                avatar: editingPlayer.avatar
+              }}
+              submitLabel="Save changes"
+              loading={actionLoading}
+              onSubmit={handleUpdatePlayer}
+              onCancel={() => {
+                setFormMode(null);
+                setEditingId(null);
+              }}
+            />
           </div>
-          <PlayerForm
-            initialValues={{
-              name: editingPlayer.name,
-              username: editingPlayer.username,
-              rating: editingPlayer.stats.currentRating,
-              avatar: editingPlayer.avatar
-            }}
-            submitLabel="Save changes"
-            loading={actionLoading}
-            onSubmit={handleUpdate}
-            onCancel={() => {
-              setFormMode(null);
-              setEditingPlayerId(null);
-            }}
-          />
-        </div>
-      );
-    }
+        );
+      }
 
-    if (formMode === 'create') {
-      return (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900">Add new player</h3>
-              <p className="text-sm text-gray-500">Create a new profile</p>
+      if (formMode === 'create') {
+        return (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Add new player</h3>
+                <p className="text-sm text-gray-500">Create a new profile</p>
+              </div>
             </div>
+            <PlayerForm
+              loading={actionLoading}
+              onSubmit={handleCreatePlayer}
+              onCancel={() => setFormMode(null)}
+            />
           </div>
-          <PlayerForm
-            loading={actionLoading}
-            onSubmit={handleCreate}
-            onCancel={() => setFormMode(null)}
-          />
-        </div>
-      );
+        );
+      }
+    } else {
+      if (formMode === 'edit' && editingGame) {
+        return (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Edit game</h3>
+                <p className="text-sm text-gray-500">Update game details</p>
+              </div>
+            </div>
+            <GameForm
+              initialValues={editingGame}
+              submitLabel="Save changes"
+              loading={actionLoading}
+              onSubmit={handleUpdateGame}
+              onCancel={() => {
+                setFormMode(null);
+                setEditingId(null);
+              }}
+            />
+          </div>
+        );
+      }
+
+      if (formMode === 'create') {
+        return (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Add new game</h3>
+                <p className="text-sm text-gray-500">Record a new game</p>
+              </div>
+            </div>
+            <GameForm
+              loading={actionLoading}
+              onSubmit={handleCreateGame}
+              onCancel={() => setFormMode(null)}
+            />
+          </div>
+        );
+      }
     }
 
     return null;
@@ -236,7 +347,7 @@ export function AdminPage() {
           <div>
             <h1 className="text-4xl font-bold text-gray-900">Admin zone</h1>
             <p className="text-gray-600">
-              Manage player records. Authentication is required for sensitive actions.
+              Manage player records and games. Authentication is required for sensitive actions.
             </p>
           </div>
         </div>
@@ -278,78 +389,174 @@ export function AdminPage() {
 
       {!isAuthenticated && renderLoginPanel()}
 
+      <div className="flex gap-4">
+        <button
+          onClick={() => {
+            setActiveTab('players');
+            setFormMode(null);
+          }}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'players'
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
+              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            }`}
+        >
+          <User className="w-5 h-5" />
+          <span>Players</span>
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('games');
+            setFormMode(null);
+          }}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 ${activeTab === 'games'
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50'
+              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            }`}
+        >
+          <Trophy className="w-5 h-5" />
+          <span>Games</span>
+        </button>
+      </div>
+
       <section className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Players</h2>
-            <p className="text-sm text-gray-500">Total: {players.length}</p>
+            <h2 className="text-2xl font-bold text-gray-900 capitalize">{activeTab}</h2>
+            <p className="text-sm text-gray-500">Total: {activeTab === 'players' ? players.length : games.length}</p>
           </div>
           <button
             onClick={() => {
               if (!isAuthenticated) {
-                setStatusMessage('Please sign in to add players.');
+                setStatusMessage(`Please sign in to add ${activeTab}.`);
                 return;
               }
               setFormMode('create');
-              setEditingPlayerId(null);
+              setEditingId(null);
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium disabled:opacity-70"
             disabled={!isAuthenticated}
           >
             <Plus className="w-4 h-4" />
-            Add player
+            Add {activeTab === 'players' ? 'player' : 'game'}
           </button>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                <th className="px-6 py-3">Name</th>
-                <th className="px-6 py-3">Username</th>
-                <th className="px-6 py-3">Rating</th>
-                <th className="px-6 py-3">Games</th>
-                <th className="px-6 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {players.map(player => (
-                <tr key={player.id} className="text-sm text-gray-700">
-                  <td className="px-6 py-4 font-semibold text-gray-900">{player.name}</td>
-                  <td className="px-6 py-4">@{player.username}</td>
-                  <td className="px-6 py-4">{player.stats.currentRating}</td>
-                  <td className="px-6 py-4">{player.stats.totalGames}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => {
-                          if (!isAuthenticated) {
-                            setStatusMessage('Please sign in to edit players.');
-                            return;
-                          }
-                          setFormMode('edit');
-                          setEditingPlayerId(player.id);
-                        }}
-                        className="flex items-center gap-1 text-blue-600 hover:text-blue-800 disabled:opacity-50"
-                        disabled={!isAuthenticated || actionLoading}
-                      >
-                        <Edit3 className="w-4 h-4" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(player.id)}
-                        className="flex items-center gap-1 text-rose-600 hover:text-rose-800 disabled:opacity-50"
-                        disabled={!isAuthenticated || actionLoading}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+          {activeTab === 'players' ? (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3">Name</th>
+                  <th className="px-6 py-3">Username</th>
+                  <th className="px-6 py-3">Rating</th>
+                  <th className="px-6 py-3">Games</th>
+                  <th className="px-6 py-3">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {players.map(player => (
+                  <tr key={player.id} className="text-sm text-gray-700">
+                    <td className="px-6 py-4 font-semibold text-gray-900">{player.name}</td>
+                    <td className="px-6 py-4">@{player.username}</td>
+                    <td className="px-6 py-4">{player.stats.currentRating}</td>
+                    <td className="px-6 py-4">{player.stats.totalGames}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => {
+                            if (!isAuthenticated) {
+                              setStatusMessage('Please sign in to edit players.');
+                              return;
+                            }
+                            setFormMode('edit');
+                            setEditingId(player.id);
+                          }}
+                          className="flex items-center gap-1 text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                          disabled={!isAuthenticated || actionLoading}
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(player.id)}
+                          className="flex items-center gap-1 text-rose-600 hover:text-rose-800 disabled:opacity-50"
+                          disabled={!isAuthenticated || actionLoading}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3">Date</th>
+                  <th className="px-6 py-3">White</th>
+                  <th className="px-6 py-3">Black</th>
+                  <th className="px-6 py-3">Result</th>
+                  <th className="px-6 py-3">Moves</th>
+                  <th className="px-6 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {games.map(game => {
+                  const whitePlayer = players.find(p => p.id === (game.color === 'white' ? game.playerId : game.opponentId));
+                  const blackPlayer = players.find(p => p.id === (game.color === 'black' ? game.playerId : game.opponentId));
+
+                  return (
+                    <tr key={game.id} className="text-sm text-gray-700">
+                      <td className="px-6 py-4">{format(new Date(game.date), 'MMM d, yyyy')}</td>
+                      <td className="px-6 py-4 font-medium">{whitePlayer?.name || 'Unknown'}</td>
+                      <td className="px-6 py-4 font-medium">{blackPlayer?.name || 'Unknown'}</td>
+                      <td className="px-6 py-4 capitalize">
+                        <span className={`px-2 py-1 rounded-lg text-xs font-bold ${game.result === 'win' && game.color === 'white' ? 'bg-emerald-100 text-emerald-700' :
+                            game.result === 'loss' && game.color === 'black' ? 'bg-emerald-100 text-emerald-700' :
+                              game.result === 'draw' ? 'bg-amber-100 text-amber-700' :
+                                'bg-rose-100 text-rose-700'
+                          }`}>
+                          {game.result === 'draw' ? 'Draw' :
+                            (game.result === 'win' && game.color === 'white') || (game.result === 'loss' && game.color === 'black') ? 'White Win' : 'Black Win'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">{game.moves}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => {
+                              if (!isAuthenticated) {
+                                setStatusMessage('Please sign in to edit games.');
+                                return;
+                              }
+                              setFormMode('edit');
+                              setEditingId(game.id);
+                            }}
+                            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                            disabled={!isAuthenticated || actionLoading}
+                          >
+                            <Edit3 className="w-4 h-4" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(game.id)}
+                            className="flex items-center gap-1 text-rose-600 hover:text-rose-800 disabled:opacity-50"
+                            disabled={!isAuthenticated || actionLoading}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </section>
 
@@ -370,14 +577,14 @@ export function AdminPage() {
         isOpen={showDeleteModal}
         onClose={() => {
           setShowDeleteModal(false);
-          setPlayerToDelete(null);
+          setItemToDelete(null);
         }}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Player"
+        onConfirm={activeTab === 'players' ? handleDeletePlayer : handleDeleteGame}
+        title={`Delete ${activeTab === 'players' ? 'Player' : 'Game'}`}
         message={
-          playerToDelete
-            ? `Are you sure you want to delete "${players.find(p => p.id === playerToDelete)?.name || 'this player'}"? This action cannot be undone.`
-            : 'Are you sure you want to delete this player? This action cannot be undone.'
+          itemToDelete
+            ? `Are you sure you want to delete this ${activeTab === 'players' ? 'player' : 'game'}? This action cannot be undone.`
+            : `Are you sure you want to delete this ${activeTab === 'players' ? 'player' : 'game'}? This action cannot be undone.`
         }
         confirmLabel="Delete"
         cancelLabel="Cancel"

@@ -19,13 +19,13 @@ interface FetchOptions {
 async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { method = 'GET', body, headers, authHeader } = options;
 
-  const requestHeaders: HeadersInit = {
+  const requestHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...headers
+    ...(headers as Record<string, string>)
   };
 
   if (authHeader) {
-    requestHeaders.Authorization = authHeader;
+    requestHeaders['Authorization'] = authHeader;
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -33,10 +33,10 @@ async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promis
     headers: requestHeaders,
     body: body ? JSON.stringify(body) : undefined
   });
-  
+
   if (!response.ok) {
     let message = response.statusText;
-    
+
     try {
       const errorBody = await response.json();
       if (typeof errorBody?.error === 'string') {
@@ -58,7 +58,7 @@ async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promis
 
     throw new Error(`API error: ${message}`);
   }
-  
+
   if (response.status === 204) {
     return undefined as T;
   }
@@ -80,7 +80,7 @@ export const playerAPI = {
     players.forEach(cachePlayer);
     return players;
   },
-  
+
   getById: async (id: string): Promise<Player> => {
     const cachedPlayer = playerCache.get(id);
     if (cachedPlayer) {
@@ -155,17 +155,53 @@ export const gameAPI = {
     const url = playerId ? `/games?playerId=${playerId}` : '/games';
     return fetchAPI<ChessGame[]>(url);
   },
-  
+
   getById: async (id: string): Promise<ChessGame> => {
     return fetchAPI<ChessGame>(`/games/${id}`);
   },
-  
+
   getByPlayerId: async (playerId: string): Promise<ChessGame[]> => {
     return fetchAPI<ChessGame[]>(`/games/player/${playerId}`);
   },
-  
+
   getPlayerStatistics: async (playerId: string): Promise<GameStatistics> => {
     return fetchAPI<GameStatistics>(`/games/player/${playerId}/statistics`);
+  },
+
+  create: async (payload: Partial<ChessGame>, authHeader: string | null): Promise<ChessGame> => {
+    if (!authHeader) {
+      throw new Error('Authorization header is required');
+    }
+    return fetchAPI<ChessGame>('/games', {
+      method: 'POST',
+      body: payload,
+      authHeader
+    });
+  },
+
+  update: async (
+    id: string,
+    payload: Partial<ChessGame>,
+    authHeader: string | null
+  ): Promise<ChessGame> => {
+    if (!authHeader) {
+      throw new Error('Authorization header is required');
+    }
+    return fetchAPI<ChessGame>(`/games/${id}`, {
+      method: 'PUT',
+      body: payload,
+      authHeader
+    });
+  },
+
+  delete: async (id: string, authHeader: string | null): Promise<void> => {
+    if (!authHeader) {
+      throw new Error('Authorization header is required');
+    }
+    await fetchAPI<void>(`/games/${id}`, {
+      method: 'DELETE',
+      authHeader
+    });
   }
 };
 
