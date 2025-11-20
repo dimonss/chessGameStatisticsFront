@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode
 } from 'react';
+import { authAPI } from '../utils/api';
 
 interface AuthState {
   username: string;
@@ -16,7 +17,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   username: string | null;
   authHeader: string | null;
-  login: (username: string, password: string) => void;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -40,10 +41,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = (username: string, password: string) => {
+  const login = async (username: string, password: string) => {
     const trimmedUsername = username.trim();
     if (!trimmedUsername || !password) {
       throw new Error('Username and password are required');
+    }
+
+    // Verify credentials with backend
+    const result = await authAPI.verify(trimmedUsername, password);
+
+    if (!result.success) {
+      throw new Error('Authentication failed');
     }
 
     const token = btoa(`${trimmedUsername}:${password}`);

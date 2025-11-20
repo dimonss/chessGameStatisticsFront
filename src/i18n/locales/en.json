@@ -23,7 +23,8 @@
         "confirm": "Confirm",
         "unknown": "Unknown",
         "search": "Search players...",
-        "select": "Select..."
+        "select": "Select...",
+        "unauthorized": "Unauthorized. Please check your credentials."
     },
     "player": {
         "name": "Name",
@@ -81,7 +82,7 @@
         "noGames": "No games recorded yet."
     },
     "validation": {
-        "required": "Required field",
+        "required": "Fields are required",
         "positive": "Must be a positive number",
         "samePlayer": "Player and opponent cannot be the same"
     },

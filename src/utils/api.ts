@@ -52,11 +52,7 @@ async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promis
       throw new Error('Resource not found');
     }
 
-    if (response.status === 401 || response.status === 403) {
-      throw new Error('Unauthorized. Please check your credentials.');
-    }
-
-    throw new Error(`API error: ${message}`);
+    throw new Error(message);
   }
 
   if (response.status === 204) {
@@ -65,6 +61,19 @@ async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promis
 
   return response.json();
 }
+
+// Authentication API
+export const authAPI = {
+  verify: async (username: string, password: string): Promise<{ success: boolean; username: string }> => {
+    const token = btoa(`${username}:${password}`);
+    const authHeader = `Basic ${token}`;
+
+    return fetchAPI<{ success: boolean; username: string }>('/auth/verify', {
+      method: 'POST',
+      authHeader
+    });
+  }
+};
 
 const playerCache = new Map<string, Player>();
 const inFlightPlayerRequests = new Map<string, Promise<Player>>();

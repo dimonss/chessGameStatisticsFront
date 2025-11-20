@@ -17,13 +17,34 @@ export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     if (!isOpen) return null;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const getLocalizedError = (error: Error): string => {
+        const message = error.message.toLowerCase();
+
+        // Map backend error messages to translation keys
+        if (message.includes('invalid username or password')) {
+            return t('common.unauthorized');
+        }
+        if (message.includes('unauthorized')) {
+            return t('common.unauthorized');
+        }
+        if (message.includes('username and password are required')) {
+            return t('validation.required');
+        }
+
+        return error.message;
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
+        setLoading(true);
+
         try {
-            login(username, password);
+            await login(username, password);
             setUsername('');
             setPassword('');
             setError(null);
@@ -36,7 +57,9 @@ export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
 
             onClose();
         } catch (err) {
-            setError(err instanceof Error ? err.message : t('common.error'));
+            setError(err instanceof Error ? getLocalizedError(err) : t('common.error'));
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -70,7 +93,8 @@ export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
                                 type="text"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                disabled={loading}
+                                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="admin"
                                 autoFocus
                             />
@@ -83,7 +107,8 @@ export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                disabled={loading}
+                                className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -96,9 +121,10 @@ export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
 
                         <button
                             type="submit"
-                            className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg hover:opacity-90 transition-all active:scale-[0.98]"
+                            disabled={loading}
+                            className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                         >
-                            {t('app.signIn')}
+                            {loading ? t('common.loading') : t('app.signIn')}
                         </button>
                     </form>
                 </div>
