@@ -107,9 +107,9 @@ export function PlayerPage() {
       </button>
 
       {/* Player Header */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-8 shadow-lg border border-gray-200/50 mb-6">
-        <div className="flex items-center gap-6">
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getRatingColor(currentRating)} shadow-xl flex items-center justify-center overflow-hidden`}>
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-4 sm:p-8 shadow-lg border border-gray-200/50 mb-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+          <div className={`w-16 h-16 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${getRatingColor(currentRating)} shadow-xl flex items-center justify-center overflow-hidden flex-shrink-0`}>
             {player.avatar ? (
               <img
                 src={player.avatar}
@@ -120,23 +120,23 @@ export function PlayerPage() {
               <User className="w-8 h-8 text-white" />
             )}
           </div>
-          <div className="flex-1">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">{player.name}</h1>
-            <p className="text-lg text-gray-600 mb-4">@{player.username}</p>
-            <div className="flex items-center gap-6">
-              <div>
-                <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">{t('player.currentRating')}</span>
-                <p className={`text-3xl font-bold bg-gradient-to-r ${getRatingColor(currentRating)} bg-clip-text text-transparent`}>
+          <div className="flex-1 w-full text-center sm:text-left">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">{player.name}</h1>
+            <p className="text-base sm:text-lg text-gray-600 mb-3 sm:mb-4">@{player.username}</p>
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+              <div className="text-center sm:text-left">
+                <span className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide block">{t('player.currentRating')}</span>
+                <p className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${getRatingColor(currentRating)} bg-clip-text text-transparent`}>
                   {currentRating}
                 </p>
               </div>
-              <div>
-                <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">{t('player.totalGames')}</span>
-                <p className="text-3xl font-bold text-gray-900">{statistics ? statistics.totalGames : 0}</p>
+              <div className="text-center sm:text-left">
+                <span className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide block">{t('player.totalGames')}</span>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{statistics ? statistics.totalGames : 0}</p>
               </div>
-              <div>
-                <span className="text-sm font-semibold text-gray-500 uppercase tracking-wide">{t('player.winRate')}</span>
-                <p className="text-3xl font-bold text-emerald-600">
+              <div className="text-center sm:text-left">
+                <span className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide block">{t('player.winRate')}</span>
+                <p className="text-2xl sm:text-3xl font-bold text-emerald-600">
                   {statistics ? statistics.winRate.toFixed(1) : '0.0'}%
                 </p>
               </div>

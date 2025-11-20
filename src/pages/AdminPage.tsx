@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, Lock, Loader2, Edit3, Trash2, Plus, LogOut, AlertCircle, Trophy, User } from 'lucide-react';
 import { PlayerForm } from '../components/PlayerForm';
@@ -16,6 +17,7 @@ type Tab = 'players' | 'games';
 export function AdminPage() {
   const { isAuthenticated, username, authHeader, logout } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('players');
 
   // Data state
@@ -71,6 +73,7 @@ export function AdminPage() {
     logout();
     setStatusMessage(t('app.logout'));
     setShowLogoutModal(false);
+    navigate('/');
   };
 
   // Player Actions

@@ -1,6 +1,5 @@
 {
     "app": {
-        "title": "Chess Stats",
         "subtitle": "Track your progress",
         "admin": "Admin",
         "logout": "Logout",
@@ -15,6 +14,7 @@
         "loading": "Loading...",
         "error": "Error",
         "save": "Save changes",
+        "saving": "Saving...",
         "cancel": "Cancel",
         "delete": "Delete",
         "edit": "Edit",
@@ -22,7 +22,8 @@
         "actions": "Actions",
         "confirm": "Confirm",
         "unknown": "Unknown",
-        "search": "Search players..."
+        "search": "Search players...",
+        "select": "Select..."
     },
     "player": {
         "name": "Name",
@@ -36,18 +37,33 @@
         "totalGames": "Total Games",
         "currentRating": "Current Rating",
         "bestRating": "Best Rating",
-        "avatarUrl": "Avatar URL"
+        "avatarUrl": "Avatar URL",
+        "subtitle": "View all chess players and their statistics",
+        "total": "players total"
     },
     "game": {
         "date": "Date",
+        "player": "Player",
+        "opponent": "Opponent",
+        "color": "Color",
         "white": "White",
         "black": "Black",
         "result": "Result",
         "moves": "Moves",
         "opening": "Opening",
         "timeControl": "Time Control",
+        "timeControls": {
+            "bullet": "Bullet",
+            "blitz": "Blitz",
+            "rapid": "Rapid",
+            "classical": "Classical"
+        },
         "notes": "Notes",
+        "notesPlaceholder": "Game analysis or comments...",
         "ratingChange": "Rating Change",
+        "ratingBefore": "Before",
+        "ratingAfter": "After",
+        "ratingDiff": "Change",
         "whiteRating": "White Rating",
         "blackRating": "Black Rating",
         "win": "Win",
@@ -55,6 +71,11 @@
         "draw": "Draw",
         "whiteWin": "White Win",
         "blackWin": "Black Win"
+    },
+    "validation": {
+        "required": "Required field",
+        "positive": "Must be a positive number",
+        "samePlayer": "Player and opponent cannot be the same"
     },
     "admin": {
         "title": "Admin zone",

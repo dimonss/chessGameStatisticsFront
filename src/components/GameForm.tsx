@@ -122,10 +122,10 @@ export function GameForm({
                         className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
                         disabled={loading}
                     >
-                        <option value="bullet">Bullet</option>
-                        <option value="blitz">Blitz</option>
-                        <option value="rapid">Rapid</option>
-                        <option value="classical">Classical</option>
+                        <option value="bullet">{t('game.timeControls.bullet')}</option>
+                        <option value="blitz">{t('game.timeControls.blitz')}</option>
+                        <option value="rapid">{t('game.timeControls.rapid')}</option>
+                        <option value="classical">{t('game.timeControls.classical')}</option>
                     </select>
                 </div>
 

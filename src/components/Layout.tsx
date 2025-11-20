@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Users, Home, Shield } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +12,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { isAuthenticated, username, logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -31,7 +32,7 @@ export function Layout({ children }: LayoutProps) {
                 <Home className="w-6 h-6 text-white" />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                {t('app.title')}
+                Chess State
               </span>
             </div>
             <div className="flex items-center space-x-3">
@@ -44,8 +45,8 @@ export function Layout({ children }: LayoutProps) {
                     key={item.path}
                     to={item.path}
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all duration-300 font-medium ${isActive
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50 scale-105'
-                        : 'text-gray-600 hover:bg-gray-100/80 hover:scale-105'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/50 scale-105'
+                      : 'text-gray-600 hover:bg-gray-100/80 hover:scale-105'
                       }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -81,6 +82,7 @@ export function Layout({ children }: LayoutProps) {
         onConfirm={() => {
           logout();
           setShowLogoutModal(false);
+          navigate('/');
         }}
         title={t('app.logout')}
         message={t('admin.logoutConfirm')}

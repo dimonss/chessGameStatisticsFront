@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Lock, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -6,11 +7,13 @@ import { useAuth } from '../context/AuthContext';
 interface LoginModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: () => void;
 }
 
-export function LoginModal({ isOpen, onClose }: LoginModalProps) {
+export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
     const { t } = useTranslation();
     const { login } = useAuth();
+    const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -24,6 +27,13 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             setUsername('');
             setPassword('');
             setError(null);
+
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                navigate('/admin');
+            }
+
             onClose();
         } catch (err) {
             setError(err instanceof Error ? err.message : t('common.error'));

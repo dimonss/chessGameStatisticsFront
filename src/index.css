@@ -39,3 +39,27 @@ code {
   background: linear-gradient(to bottom, #2563eb, #4f46e5);
 }
 
+/* Mobile responsiveness fixes */
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+#root {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Prevent text from causing horizontal overflow */
+* {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
