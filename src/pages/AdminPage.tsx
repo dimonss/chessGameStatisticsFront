@@ -14,7 +14,7 @@ type FormMode = 'create' | 'edit' | null;
 type Tab = 'players' | 'games';
 
 export function AdminPage() {
-  const { isAuthenticated, username, authHeader, login, logout } = useAuth();
+  const { isAuthenticated, username, authHeader, logout } = useAuth();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<Tab>('players');
 
@@ -29,10 +29,6 @@ export function AdminPage() {
   const [formMode, setFormMode] = useState<FormMode>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-
-  // Login state
-  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
-  const [loginError, setLoginError] = useState<string | null>(null);
 
   // Modals
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -70,18 +66,6 @@ export function AdminPage() {
   useEffect(() => {
     loadData();
   }, []);
-
-  const handleLoginSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    try {
-      login(loginForm.username, loginForm.password);
-      setLoginForm({ username: '', password: '' });
-      setLoginError(null);
-      setStatusMessage(t('admin.authSuccess'));
-    } catch (err) {
-      setLoginError(err instanceof Error ? err.message : t('common.error'));
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -193,50 +177,6 @@ export function AdminPage() {
     setItemToDelete(id);
     setShowDeleteModal(true);
   };
-
-  const renderLoginPanel = () => (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 max-w-lg mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg">
-          <Lock className="w-6 h-6" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">{t('admin.access')}</h2>
-          <p className="text-gray-600 text-sm">{t('admin.credentials')}</p>
-        </div>
-      </div>
-      <form onSubmit={handleLoginSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.username')}</label>
-          <input
-            type="text"
-            value={loginForm.username}
-            onChange={event => setLoginForm(prev => ({ ...prev, username: event.target.value }))}
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
-            placeholder="admin"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.password')}</label>
-          <input
-            type="password"
-            value={loginForm.password}
-            onChange={event => setLoginForm(prev => ({ ...prev, password: event.target.value }))}
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
-            placeholder="••••••••"
-          />
-        </div>
-        {loginError && <p className="text-sm text-rose-500">{loginError}</p>}
-        <button
-          type="submit"
-          className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-        >
-          {t('app.signIn')}
-        </button>
-      </form>
-    </div>
-  );
-
 
   const renderModals = () => {
     if (!isAuthenticated) return null;
@@ -369,9 +309,6 @@ export function AdminPage() {
           <span>{error}</span>
         </div>
       )}
-
-      {!isAuthenticated && renderLoginPanel()}
-
       <div className="flex gap-4">
         <button
           onClick={() => {
