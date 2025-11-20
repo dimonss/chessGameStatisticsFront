@@ -1,6 +1,7 @@
 import { ChessGame } from '../types/chess';
 import { GameCard } from './GameCard';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface GameListProps {
   games: ChessGame[];
@@ -9,12 +10,13 @@ interface GameListProps {
 
 export function GameList({ games, currentPlayerId }: GameListProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-4">
       {games.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
-          <p>No games recorded yet.</p>
+          <p>{t('game.noGames')}</p>
         </div>
       ) : (
         games.map((game, index) => (

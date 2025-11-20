@@ -39,7 +39,14 @@
         "bestRating": "Best Rating",
         "avatarUrl": "Avatar URL",
         "subtitle": "View all chess players and their statistics",
-        "total": "players total"
+        "total": "players total",
+        "analytics": "Analytics",
+        "performance": "Performance",
+        "avgRating": "Avg Rating",
+        "change": "Change",
+        "timeControl": "Time Control",
+        "gamesByColor": "Games by Color",
+        "recentGames": "Recent Games"
     },
     "game": {
         "date": "Date",
@@ -70,7 +77,8 @@
         "loss": "Loss",
         "draw": "Draw",
         "whiteWin": "White Win",
-        "blackWin": "Black Win"
+        "blackWin": "Black Win",
+        "noGames": "No games recorded yet."
     },
     "validation": {
         "required": "Required field",

@@ -1,15 +1,17 @@
 import { GameStatistics } from '../types/chess';
 import { Trophy, TrendingUp, TrendingDown, Minus, BarChart3, Target, Award, Activity, Clock } from 'lucide-react';
 import { GameCard } from './GameCard';
+import { useTranslation } from 'react-i18next';
 
 interface AnalyticsProps {
   statistics: GameStatistics;
 }
 
 export function Analytics({ statistics }: AnalyticsProps) {
+  const { t } = useTranslation();
   const statCards = [
     {
-      label: 'Total Games',
+      label: t('player.totalGames'),
       value: statistics.totalGames,
       icon: BarChart3,
       gradient: 'from-blue-500 to-cyan-600',
@@ -17,7 +19,7 @@ export function Analytics({ statistics }: AnalyticsProps) {
       textColor: 'text-blue-600'
     },
     {
-      label: 'Wins',
+      label: t('player.wins'),
       value: statistics.wins,
       icon: Trophy,
       gradient: 'from-emerald-500 to-green-600',
@@ -25,7 +27,7 @@ export function Analytics({ statistics }: AnalyticsProps) {
       textColor: 'text-emerald-600'
     },
     {
-      label: 'Losses',
+      label: t('player.losses'),
       value: statistics.losses,
       icon: TrendingDown,
       gradient: 'from-rose-500 to-red-600',
@@ -33,7 +35,7 @@ export function Analytics({ statistics }: AnalyticsProps) {
       textColor: 'text-rose-600'
     },
     {
-      label: 'Draws',
+      label: t('player.draws'),
       value: statistics.draws,
       icon: Minus,
       gradient: 'from-amber-500 to-yellow-600',
@@ -55,8 +57,8 @@ export function Analytics({ statistics }: AnalyticsProps) {
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div 
-              key={stat.label} 
+            <div
+              key={stat.label}
               className={`relative overflow-hidden bg-gradient-to-br ${stat.bgGradient} rounded-2xl p-6 shadow-lg border border-white/50 hover:shadow-xl transition-all duration-300 hover:scale-105 animate-slide-up`}
               style={{ animationDelay: `${index * 100}ms` }}
             >
@@ -83,12 +85,12 @@ export function Analytics({ statistics }: AnalyticsProps) {
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
               <Target className="w-5 h-5 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900">Performance</h3>
+            <h3 className="text-2xl font-bold text-gray-900">{t('player.performance')}</h3>
           </div>
           <div className="space-y-6">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-600 font-medium">Win Rate</span>
+                <span className="text-gray-600 font-medium">{t('player.winRate')}</span>
                 <span className="font-bold text-2xl text-gray-900">{statistics.winRate.toFixed(1)}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner">
@@ -102,17 +104,16 @@ export function Analytics({ statistics }: AnalyticsProps) {
               <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-100">
                 <div className="flex items-center gap-2 mb-1">
                   <Activity className="w-4 h-4 text-blue-600" />
-                  <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Avg Rating</span>
+                  <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">{t('player.avgRating')}</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">{statistics.averageRating}</p>
               </div>
-              <div className={`p-4 rounded-xl border ${
-                statistics.ratingChange > 0 
-                  ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-100' 
+              <div className={`p-4 rounded-xl border ${statistics.ratingChange > 0
+                  ? 'bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-100'
                   : statistics.ratingChange < 0
-                  ? 'bg-gradient-to-br from-rose-50 to-red-50 border-rose-100'
-                  : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'
-              }`}>
+                    ? 'bg-gradient-to-br from-rose-50 to-red-50 border-rose-100'
+                    : 'bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200'
+                }`}>
                 <div className="flex items-center gap-2 mb-1">
                   {statistics.ratingChange > 0 ? (
                     <TrendingUp className={`w-4 h-4 ${statistics.ratingChange > 0 ? 'text-emerald-600' : ''}`} />
@@ -121,17 +122,15 @@ export function Analytics({ statistics }: AnalyticsProps) {
                   ) : (
                     <Minus className="w-4 h-4 text-gray-600" />
                   )}
-                  <span className={`text-xs font-semibold uppercase tracking-wide ${
-                    statistics.ratingChange > 0 ? 'text-emerald-600' : 
-                    statistics.ratingChange < 0 ? 'text-rose-600' : 'text-gray-600'
-                  }`}>
-                    Change
+                  <span className={`text-xs font-semibold uppercase tracking-wide ${statistics.ratingChange > 0 ? 'text-emerald-600' :
+                      statistics.ratingChange < 0 ? 'text-rose-600' : 'text-gray-600'
+                    }`}>
+                    {t('player.change')}
                   </span>
                 </div>
-                <p className={`text-2xl font-bold ${
-                  statistics.ratingChange > 0 ? 'text-emerald-600' : 
-                  statistics.ratingChange < 0 ? 'text-rose-600' : 'text-gray-600'
-                }`}>
+                <p className={`text-2xl font-bold ${statistics.ratingChange > 0 ? 'text-emerald-600' :
+                    statistics.ratingChange < 0 ? 'text-rose-600' : 'text-gray-600'
+                  }`}>
                   {statistics.ratingChange > 0 ? '+' : ''}{statistics.ratingChange}
                 </p>
               </div>
@@ -144,7 +143,7 @@ export function Analytics({ statistics }: AnalyticsProps) {
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-lg">
               <Clock className="w-5 h-5 text-white" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900">Time Control</h3>
+            <h3 className="text-2xl font-bold text-gray-900">{t('player.timeControl')}</h3>
           </div>
           <div className="space-y-4">
             {Object.entries(statistics.gamesByTimeControl).map(([control, count], index) => {
@@ -153,7 +152,7 @@ export function Analytics({ statistics }: AnalyticsProps) {
               return (
                 <div key={control} className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-700 font-semibold capitalize">{control}</span>
+                    <span className="text-gray-700 font-semibold">{t(`game.timeControls.${control}`)}</span>
                     <span className="font-bold text-lg text-gray-900">{count}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-inner">
@@ -174,7 +173,7 @@ export function Analytics({ statistics }: AnalyticsProps) {
           <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg">
             <Award className="w-5 h-5 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900">Games by Color</h3>
+          <h3 className="text-2xl font-bold text-gray-900">{t('player.gamesByColor')}</h3>
         </div>
         <div className="grid grid-cols-2 gap-6">
           <div className="relative overflow-hidden text-center p-8 bg-gradient-to-br from-chess-light to-white rounded-xl border-4 border-chess-dark shadow-xl transform hover:scale-105 transition-all duration-300">
@@ -183,7 +182,7 @@ export function Analytics({ statistics }: AnalyticsProps) {
               <div className="w-16 h-16 mx-auto mb-4 bg-white rounded-full flex items-center justify-center shadow-lg border-4 border-chess-dark">
                 <span className="text-2xl">♔</span>
               </div>
-              <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wide">White</p>
+              <p className="text-sm font-bold text-gray-600 mb-2 uppercase tracking-wide">{t('game.white')}</p>
               <p className="text-5xl font-bold text-gray-900">{statistics.gamesByColor.white}</p>
             </div>
           </div>
@@ -193,7 +192,7 @@ export function Analytics({ statistics }: AnalyticsProps) {
               <div className="w-16 h-16 mx-auto mb-4 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border-4 border-white/30">
                 <span className="text-2xl">♚</span>
               </div>
-              <p className="text-sm font-bold text-white/90 mb-2 uppercase tracking-wide">Black</p>
+              <p className="text-sm font-bold text-white/90 mb-2 uppercase tracking-wide">{t('game.black')}</p>
               <p className="text-5xl font-bold text-white">{statistics.gamesByColor.black}</p>
             </div>
           </div>
@@ -206,7 +205,7 @@ export function Analytics({ statistics }: AnalyticsProps) {
             <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg">
               <BarChart3 className="w-5 h-5 text-white" />
             </div>
-            Recent Games
+            {t('player.recentGames')}
           </h3>
           <div className="space-y-4">
             {statistics.recentGames.map((game, index) => (

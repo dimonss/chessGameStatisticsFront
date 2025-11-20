@@ -165,7 +165,7 @@ export function PlayerPage() {
             }`}
         >
           <User className="w-5 h-5" />
-          <span>Analytics</span>
+          <span>{t('player.analytics')}</span>
         </button>
       </div>
 
