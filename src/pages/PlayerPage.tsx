@@ -6,6 +6,7 @@ import { Player, ChessGame, GameStatistics } from '../types/chess';
 import { GameList } from '../components/GameList';
 import { Analytics } from '../components/Analytics';
 import { ArrowLeft, User, Trophy, Loader2, AlertCircle } from 'lucide-react';
+import { getImageUrl } from '../utils/image';
 
 export function PlayerPage() {
   const { id } = useParams<{ id: string }>();
@@ -112,7 +113,7 @@ export function PlayerPage() {
           <div className={`w-16 h-16 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${getRatingColor(currentRating)} shadow-xl flex items-center justify-center overflow-hidden flex-shrink-0`}>
             {player.avatar ? (
               <img
-                src={player.avatar}
+                src={getImageUrl(player.avatar)}
                 alt={player.name}
                 className="w-full h-full object-cover"
               />

@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { PlayerFormValues } from '../types/chess';
 import { playerAPI } from '../utils/api';
+import { getImageUrl } from '../utils/image';
 
 interface PlayerFormProps {
   initialValues?: PlayerFormValues;
@@ -38,7 +39,8 @@ export function PlayerForm({
   useEffect(() => {
     setValues(initialValues ?? emptyValues);
     setAvatarFile(null);
-    setAvatarPreview(initialValues?.avatar || null);
+    // Если есть существующий аватар, используем нормализованный URL
+    setAvatarPreview(initialValues?.avatar ? getImageUrl(initialValues.avatar) || null : null);
   }, [initialValues]);
 
   const handleChange = (field: keyof PlayerFormValues, value: string) => {
@@ -92,6 +94,10 @@ export function PlayerForm({
         setUploadingAvatar(true);
         const result = await playerAPI.uploadAvatar(avatarFile, authHeader);
         avatarPath = result.avatar;
+        // Обновляем превью на нормализованный URL после загрузки
+        if (avatarPath) {
+          setAvatarPreview(getImageUrl(avatarPath) || null);
+        }
       } catch (error) {
         setErrors(prev => ({
           ...prev,

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { PlayerWithStats } from '../types/chess';
 import { User, TrendingUp, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../utils/image';
 
 interface PlayerCardProps {
   player: PlayerWithStats;
@@ -38,7 +39,7 @@ export function PlayerCard({ player }: PlayerCardProps) {
             <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getRatingColor(currentRating)} shadow-lg flex items-center justify-center overflow-hidden`}>
               {player.avatar ? (
                 <img
-                  src={player.avatar}
+                  src={getImageUrl(player.avatar)}
                   alt={player.name}
                   className="w-full h-full object-cover"
                 />

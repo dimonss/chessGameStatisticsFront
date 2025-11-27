@@ -5,6 +5,7 @@ import { gameAPI, playerAPI } from '../utils/api';
 import { ChessGame, Player } from '../types/chess';
 import { format } from 'date-fns';
 import { ArrowLeft, Trophy, TrendingDown, TrendingUp, Minus, User, Clock, Move, Calendar, Target, Loader2, AlertCircle } from 'lucide-react';
+import { getImageUrl } from '../utils/image';
 
 export function GameDetails() {
   const { id } = useParams<{ id: string }>();
@@ -131,7 +132,7 @@ export function GameDetails() {
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center overflow-hidden">
                   {opponent?.avatar ? (
                     <img
-                      src={opponent.avatar}
+                      src={getImageUrl(opponent.avatar)}
                       alt={opponent.name}
                       className="w-full h-full object-cover"
                     />
