@@ -213,12 +213,14 @@ export function AdminPage() {
                 setFormMode(null);
                 setEditingId(null);
               }}
+              authHeader={authHeader}
             />
           ) : (
             <PlayerForm
               loading={actionLoading}
               onSubmit={handleCreatePlayer}
               onCancel={() => setFormMode(null)}
+              authHeader={authHeader}
             />
           )}
         </Modal>

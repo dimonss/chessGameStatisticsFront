@@ -155,6 +155,40 @@ export const playerAPI = {
       authHeader
     });
     playerCache.delete(id);
+  },
+
+  uploadAvatar: async (file: File, authHeader: string | null): Promise<{ avatar: string; filename: string }> => {
+    if (!authHeader) {
+      throw new Error('Authorization header is required');
+    }
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const response = await fetch(`${API_BASE_URL}/players/upload-avatar`, {
+      method: 'POST',
+      headers: {
+        'Authorization': authHeader
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      let message = response.statusText;
+      try {
+        const errorBody = await response.json();
+        if (typeof errorBody?.error === 'string') {
+          message = errorBody.error;
+        } else if (typeof errorBody?.message === 'string') {
+          message = errorBody.message;
+        }
+      } catch {
+        // ignore JSON parse errors
+      }
+      throw new Error(message);
+    }
+
+    return response.json();
   }
 };
 
