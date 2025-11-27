@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Upload, Image as ImageIcon } from 'lucide-react';
 import type { PlayerFormValues } from '../types/chess';
 import { playerAPI } from '../utils/api';
 import { getImageUrl } from '../utils/image';
@@ -34,7 +35,9 @@ export function PlayerForm({
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setValues(initialValues ?? emptyValues);
@@ -67,16 +70,86 @@ export function PlayerForm({
     return Object.keys(nextErrors).length === 0;
   };
 
+  const validateFile = (file: File): boolean => {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if (!allowedTypes.includes(file.type)) {
+      setErrors(prev => ({
+        ...prev,
+        avatar: 'Invalid file type. Only JPEG, PNG, GIF and WebP images are allowed.'
+      }));
+      return false;
+    }
+    
+    if (file.size > maxSize) {
+      setErrors(prev => ({
+        ...prev,
+        avatar: 'File too large. Maximum size is 5MB.'
+      }));
+      return false;
+    }
+    
+    return true;
+  };
+
+  const processFile = (file: File) => {
+    if (!validateFile(file)) {
+      return;
+    }
+    
+    setAvatarFile(file);
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.avatar;
+      return newErrors;
+    });
+    
+    // Создаем превью
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setAvatarFile(file);
-      // Создаем превью
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      processFile(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!loading && !uploadingAvatar) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    if (loading || uploadingAvatar) {
+      return;
+    }
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+      // Сбрасываем input, чтобы можно было выбрать тот же файл снова
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -164,7 +237,7 @@ export function PlayerForm({
         <label className="block text-sm font-medium text-gray-700 mb-1">{t('player.avatarUrl')}</label>
         <div className="space-y-3">
           {avatarPreview && (
-            <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-gray-200">
+            <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
               <img
                 src={avatarPreview}
                 alt="Avatar preview"
@@ -172,17 +245,77 @@ export function PlayerForm({
               />
             </div>
           )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-            onChange={handleFileChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            disabled={loading || uploadingAvatar}
-          />
-          {errors.avatar && <p className="text-sm text-rose-500 mt-1">{errors.avatar}</p>}
+          
+          <div
+            ref={dropZoneRef}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`
+              relative border-2 border-dashed rounded-xl p-6 transition-all duration-200
+              ${isDragging 
+                ? 'border-blue-500 bg-blue-50 scale-[1.02] shadow-lg' 
+                : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
+              }
+              ${loading || uploadingAvatar ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+            `}
+            onClick={() => !loading && !uploadingAvatar && fileInputRef.current?.click()}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+              onChange={handleFileChange}
+              className="hidden"
+              disabled={loading || uploadingAvatar}
+            />
+            
+            <div className="flex flex-col items-center justify-center gap-3 text-center">
+              {isDragging ? (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center animate-pulse">
+                    <Upload className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-700">{t('player.dragDropRelease')}</p>
+                    <p className="text-xs text-blue-600 mt-1">{t('player.dragDropFormats')}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+                    loading || uploadingAvatar 
+                      ? 'bg-gray-300' 
+                      : 'bg-blue-100 group-hover:bg-blue-200'
+                  }`}>
+                    {avatarPreview ? (
+                      <ImageIcon className="w-6 h-6 text-blue-600" />
+                    ) : (
+                      <Upload className="w-6 h-6 text-blue-600" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">
+                      {avatarPreview ? t('player.dragDropReplace') : t('player.dragDropClick')}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t('player.dragDropFormats')}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+          
+          {errors.avatar && (
+            <p className="text-sm text-rose-500 mt-1 flex items-center gap-1">
+              <span>⚠</span> {errors.avatar}
+            </p>
+          )}
           {uploadingAvatar && (
-            <p className="text-sm text-gray-500">{t('common.uploading')}...</p>
+            <p className="text-sm text-gray-500 flex items-center gap-1">
+              <span className="animate-spin">⏳</span> {t('common.uploading')}...
+            </p>
           )}
         </div>
       </div>
